@@ -1,17 +1,23 @@
 # ROBODOG — SG90 mini Spot
 
 ## Resume here (new session)
-You're mid-project, not starting fresh — **this file is the restart doc.** To get up to speed: read this whole file (design bible — visual target, the *verified* joint mechanism, rules, FreeCAD-MCP gotchas), then read the **latest dated `### Update` at the bottom** for the current state. The auto-memory `MEMORY.md` (loaded automatically) carries the printable-parts deliverable + the joint-rotation-centre rule.
+You're mid-project, not starting fresh — **this file is the restart doc.** Read the design bible below (visual target, the *verified* joint mechanism, rules, FreeCAD-MCP gotchas), then the **latest dated `### Update` at the very bottom** for the current state. Auto-memory `MEMORY.md` (loaded each session) carries the printable-parts deliverable + the joint-rotation-centre rule. Working dir: **`C:\ultrafish\robodog`** (a git repo; commit only when asked). ⚠️ The long history below (dog.py / leg4–7.py, SM3-loading, the outboard-femur redesign) is how we GOT here — the **current canonical files are the ones listed next, not `dog.py`**.
+
+**Canonical scripts** (run via `exec(open(path).read())` in the FreeCAD MCP; there is no saved `.FCStd`):
+- **`dog13.py`** — THE canonical printable geometry (frame + 4 legs + 12 servos) + all gates + stance render. Gate log accumulates in `ref/iter/leg13_dog13.txt` (**read the TAIL** — latest run).
+- **`bodyview.py`** — the cosmetic snap-on body covers (execs dog13; builds the hollow **yellow** top-lid + bottom-tub with cantilever latches + frame locating keys; renders `body_concept.png`).
+- **`assembly.py`** — full-dog render (covers on + X-ray) + the interference AUDIT (execs bodyview; writes `ref/iter/audit.txt`). **Re-run after any cover/frame change.**
+- **`frameview.py`** isolated frame render · **`legwork.py`/`poseview.py`** isolated leg render harnesses · **`pamphlet_render.py`** → part JPEGs · **`pamphlet.html`** wordless manga assembly manual (published as an Artifact).
 
 Operational must-knows before touching FreeCAD:
-- `dog.py` rebuilds all geometry (execs `leg7 → leg5 → leg4`) and exports `stl/sm3sg90_*.stl`. There is no saved `.FCStd`.
-- `execute_code` returns a huge dark inline screenshot — write numeric reports/gates to a file and Read the saved **white-bg** PNGs instead.
-- Every printable part must be a single solid; re-run the gates after any change. Mirror legs **L/R only**. Don't reinvent the verified mechanism.
-- Deliverable = 6 STLs for a **Bambu Lab A1** (boot in flexible TPU, rest rigid).
+- `execute_code` returns a huge dark inline screenshot — write numeric reports/gates to a file and Read the saved **white-bg** PNGs (`ref/iter/*.png`) instead. `ref/iter/` is gitignored (regenerable).
+- Every printable part must be a single solid (single **shell** too, for the hollow covers — a trapped void isn't printable); re-run the gates after any change. Mirror legs **L/R only**. Don't reinvent the verified joint mechanism.
+- **Deliverable = 7 STLs → `stl/sm3sg90_*.stl`** for a **Bambu Lab A1**: `body_top_lid, body_bottom_tub, frame, femur, tibia, coxa, boot_TPU` (boot in flexible TPU, rest rigid; the legs still need L/R + front/rear-tibia mirrors for the full 12-servo set).
+- **Colorway:** yellow body covers + yellow femur, black coxa/tibia/boot, grey servos (Spot-like yellow-body / black-leg).
 - The user is a CAD / Octane-SDK expert: terse replies, ask a clarifying question rather than burn rebuilds, no trailing recaps.
 
 ## What we're building
-A small, 3D-printable quadruped robot — **our own completely custom design**, driven by **12 SG90 micro-servos** (3 per leg). It takes visual/proportional cues from the Boston Dynamics Spot and the SM3 Spot-Micro, but **SM3 (and BD Spot) are REFERENCES ONLY — no external mesh or part is loaded or printed; every piece of geometry is ours.** Parametric, generated in **FreeCAD 1.1** through the FreeCAD MCP (`mcp__freecad__execute_code`). Working dir: `C:\ultrafish\3dprint\sm3-sg90\`.
+A small, 3D-printable quadruped robot — **our own completely custom design**, driven by **12 SG90 micro-servos** (3 per leg). It takes visual/proportional cues from the Boston Dynamics Spot and the SM3 Spot-Micro, but **SM3 (and BD Spot) are REFERENCES ONLY — no external mesh or part is loaded or printed; every piece of geometry is ours.** Parametric, generated in **FreeCAD 1.1** through the FreeCAD MCP (`mcp__freecad__execute_code`). Working dir: `C:\ultrafish\robodog`.
 
 The look matters as much as the mechanism. Judge the *look* of every render against the real-Spot photos in `ref/` (`n1_1` 3/4 view, `n2_1` side, `n3_1` leg closeup) and `BDspotdog.jpg` — but the design is **fully custom**: those images inform proportions and silhouette, not geometry.
 
@@ -70,17 +76,16 @@ Either way: **grow the cosmetic skin over the verified joint cores, then re-cut 
 - Mirror legs **left/right only** — never front/back (that caused the sawhorse "footstool" splay).
 - View every render against `ref/` yourself; numeric gates alone hid bad geometry before.
 
-## Files
-- `leg4.py` — verified rounded-knuckle knee + servo cutter + envelope helpers.
-- `leg5.py` — **the trustworthy base:** full single leg (knee + hip-pitch + coxa), all single solids, gates pass. (Execs `leg4.py` minus its `main()`.)
-- `leg6.py` — leg5 + SM3 foot + STL export (STLs in `stl/`).
-- `leg7.py` — ratio-correct single leg (femur 42 / tibia ~78 → thigh:tibia ≈ 1:1.9), reuses leg5's joints. `dog.py` execs this. (Its own smooth femur used `makePolygon` rings → corncob; `dog.py` replaces that with analytic ellipses.)
-- `dog.py` — **CURRENT full-dog assembly (main deliverable).** Execs `leg7` (verified knee + hip-pitch + coxa), skins the femur with a SMOOTH analytic-ellipse loft (gate-checked, falls back to leg7's femur if it overshoots), poses one leg standing (femur pitched ~down about the hip Y-axis, knee folded so the foot plants under the hip), places 4 legs (mirror **L/R only**) on a narrow body + forward sensor head, and exports the unique parts to `stl/sm3sg90_*.stl`. Pose/body tunables at the top. Gates pass; reads as SM3 Spot-Micro.
-- `spot_leg.py` — cosmetic-only Spot dog (no servos): good *silhouette* reference for the look.
-- `spot_servo_leg.py` — attempt to marry leg5 joints + smooth skin; approach right, loft tuning still bulged. Treat as a cautionary draft, not a base.
-- `ref/` — real Spot images (`n1_1`/`n2_1`/`n3_1.png`) and meshes (`spot_real_*.stl`, use as translucent GHOST only, never boolean). `ref/iter/` holds renders + `*_gates.txt`.
-- SM3 source STLs: `C:\ultrafish\Arduino-Projects-main\Nova-SM3\STL Files\All Files` (scaled ×0.66 in the scripts).
-- Auto-memory (loaded each session): `C:\Users\johnc\.claude\projects\C--ultrafish-3dprint-sm3-sg90\memory\MEMORY.md` — printable-parts deliverable + joint-rotation-centre rule. (Legacy notes may also exist under the old `C--ultrafish-freecad-mcp` memory.)
+## Files (current)
+- **`dog13.py`** — canonical printable geometry (frame + 4 legs + 12 servos) + gates + stance render. **Self-contained** (does NOT exec leg4/5/7). Part colors + the assembled `parts` list live here.
+- **`bodyview.py`** — the cosmetic snap-on covers: hollow yellow lid + tub, cantilever latches, frame locating keys. Execs dog13; renders `body_concept.png`.
+- **`assembly.py`** — full-dog render (covers + X-ray) + interference audit. Execs bodyview → `ref/iter/audit.txt`.
+- **`frameview.py`** / **`legwork.py`** / **`poseview.py`** — isolated frame / leg render harnesses.
+- **`pamphlet_render.py`** → `ref/iter/pam_*.jpg`; **`pamphlet.html`** — wordless manga assembly manual (embeds those JPEGs as data-URIs; published as an Artifact).
+- `stl/sm3sg90_*.stl` — the 7 print-ready parts.
+- `ref/` — real-Spot reference images (`n1_1`/`n2_1`/`n3_1.png`, `BDspotdog.jpg`); use meshes as translucent GHOST only, never boolean. `ref/iter/` (**gitignored**, regenerable) holds all renders + gate logs (`leg13_dog13.txt`, `audit.txt`, `body_concept.png`, `assembly.png`).
+- Auto-memory (loaded each session): `C:\Users\johnc\.claude\projects\C--ultrafish-robodog\memory\MEMORY.md`.
+- **Legacy / superseded (git history, still on disk):** `dog.py` + `leg4/5/7.py` — the old SM3-referenced full-dog exec chain that **dog13.py replaced**; the design bible + the `### Update` history below still refer to them for context. (`leg2/3/6.py`, `spot_*leg.py`, `knee_concept.py`, `build.py`, `crouch.py`, `foldflat.py` were deleted — git-recoverable.)
 
 ## FreeCAD-via-MCP gotchas
 - Each `execute_code` returns a ~25k-token base64 screenshot and has a ~90 s GUI timeout. **Print/write numeric reports to a file before any view op.** Minimize view ops; render to saved PNGs and read those instead of relying on the inline screenshot.
@@ -283,4 +288,13 @@ Iterated the body shell with the user against the SM3 look. Net result:
   - **Covers ↔ hip mechanism ~3.5 cm³ (blocker):** added **hip openings** at the 4 hips (`box` cutouts around HPx) plus a form-fit `shell.cut(sh/s0/s1/fe)` so the leg shoulders pass through → cover^legs **all 0**.
   - **Snaps:** moved stations to **x=−55/0/55** (inboard of the hip features → posts clear the frame, 0), shrank to **Ø3.4 post / Ø4.2 barb / Ø3.6 bore**, and added a **mating lid boss** so the barb has solid material to catch (bare thin wall had nothing) → **barb catch 47.4 mm³**, a firm press-snap (Ø3.4 post flexes ~0.3 mm over the lip).
   - **Audit now clean:** cover^FRAME 0, cover^legs 0 (all types), posts^FRAME/legs 0, servo0/1/2 seat 0 gouge, both covers valid single-solid manifolds. All 7 STLs re-exported valid (1.5 MB).
-- **Still open (nice-to-have):** the snap is a firm press-snap not a true cantilever; head sensor-face detail; lower rump not skirted to the floor like the chest; legs need L/R (and front/rear tibia) mirroring for the full 12-servo set.
+- *(The press-snaps, frame attachment, colorway, and assembly pamphlet were reworked in the next Update.)*
+
+### Update — session 2026-07-03 (pro cantilever latches, frame locating keys, yellow colorway, wordless manga pamphlet) — task #6 CLOSE-OUT
+The covers are now audit-clean and print-ready; task #6 is essentially done bar the "guts."
+- **Cantilever latches (bodyview.py) — supersede the press-post snaps.** 6 thin fingers on the tub hook into **release windows** in the lid wall → **toolless assemble AND disassemble** (push the lid to click; press a window from outside to release). Stations x=−55/0/55 × 2 sides, inboard of the hip features so the finger clears the frame with ~1.6 mm flex room. **Audit:** fingers clear frame/legs (0), latch engages on lift (catch on a 1.6 mm lift = 54.8 mm³), tub+lid stay single-solid single-shell. (There's a ~0.5 mm sprung preload where the parting-corner inner wall thickens — fine for a compliant 1.5 mm finger; not a jam.)
+- **Frame locating keys (user chose: panels latch to *each other* only; the frame is LOCATED + SANDWICHED, not clipped).** An **open-centre cradle ring** on the tub floor nests the frame floor-plate (x±92.5, y±33.2) → locates X/Y and rests it at z−30 on 4 corner pads; **3 lid clamp pads** bear on the frame top-plate (z14) so closing the latches sandwiches the frame vertically. Open-centre is deliberate — a solid cradle floor sealed the belly into a **trapped void** (tub went 2-shell); the ring keeps the belly cavity vented (single shell). cradle + pads clear the frame and hip servos (0 gouge). *(⚠️ new invariant: covers must stay single-**shell**, not just single-solid — check `shells=1` in the audit.)*
+- **Colorway (cosmetic only — render/material, NO geometry/gates change):** body covers = standard `YEL` (lid; tub a hair deeper so the split reads), **coxa recolored black `DRK`** to match the black tibia/boot → Spot-like **yellow-body / black-leg**. Edits: `dog13.py` leg() `sh` color YEL→DRK; `bodyview.py` `BODYT/BODYB`→yellow. STLs carry no color; unchanged.
+- **Wordless manga assembly pamphlet — `pamphlet.html`** (published Artifact). Parts runner A–H (×counts), numbered steps (leg ①–⑤ ×4, frame+body ⑥–⑨), CLICK bursts on the snap steps, a **cantilever-latch cutaway**, reverse disassembly (⑨→①), pictogram legend — all numbers/symbols, no words. CAD part renders from `pamphlet_render.py` (`ref/iter/pam_*.jpg`) embedded as data-URIs. **To update after a color/geometry change:** re-run `pamphlet_render.py`, then re-inject the base64 into the `--i-*` CSS vars in `pamphlet.html` (regex-replace each `--i-NAME:url("…")`), then re-call the Artifact tool on the same file path (redeploys to the same URL).
+- **Assembly/disassembly audit:** feasible — the static interference audit is fully clean AND every part has a clear insertion axis (servos drop into open pockets; joints assemble along their spline axes; boot pushes on; frame+legs drop into the tub cradle; the lid drops straight down and the latches click). Disassembly = the exact reverse (press the 6 windows, lift the lid).
+- **STILL OPEN / NEXT SESSION:** ① add the **electronics guts** (Pico/PCA9685/1S-LiPo + boost) — the frame tray (~34 mm cavity) and lid clamp pads are sized for them, plus wire channels crossing the joints near-axis; ② produce the **leg mirror set** for the full 12-servo build (L/R + front/rear-tibia); ③ head sensor-face detail; ④ lower rump not yet skirted to the floor like the chest. **Current gated, audit-clean checkpoint: dog13.py v22 geometry + bodyview.py v15 covers.**

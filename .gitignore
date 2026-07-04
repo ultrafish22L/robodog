@@ -1,1 +1,17 @@
-*.skb
+# Runtime / scratch
+temp/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# FreeCAD backups
+*.FCStd1
+
+# Regenerable FreeCAD render outputs (re-create by running dog.py)
+ref/iter/
+
+# Large external reference meshes (Spot scans + AI-generated ghosts; kept locally, too big to version)
+ref/*.glb
+ref/*.stl

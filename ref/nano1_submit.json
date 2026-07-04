@@ -1,0 +1,10 @@
+{
+  "status": "IN_QUEUE",
+  "request_id": "019ee3ad-341d-7d52-bd28-ced27d7e0734",
+  "response_url": "https://que2.otoy.studio/r2/otoy-studio/nano-banana-pro/requests/019ee3ad-341d-7d52-bd28-ced27d7e0734",
+  "status_url": "https://que2.otoy.studio/r2/otoy-studio/nano-banana-pro/requests/019ee3ad-341d-7d52-bd28-ced27d7e0734/status",
+  "cancel_url": "https://que2.otoy.studio/r2/otoy-studio/nano-banana-pro/requests/019ee3ad-341d-7d52-bd28-ced27d7e0734/cancel",
+  "logs": null,
+  "metrics": {},
+  "queue_position": 2
+}

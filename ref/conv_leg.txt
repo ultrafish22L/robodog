@@ -1,0 +1,5 @@
+verts=304141 faces=494910
+bounds_min=[-0.4298, 0.0, -0.2826]
+bounds_max=[0.3503, 1.103, 0.3142]
+size(x,y,z)=[0.7801, 1.103, 0.5968]
+wrote spot_real_leg.stl

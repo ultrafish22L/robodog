@@ -1,0 +1,5 @@
+verts=306318 faces=499538
+bounds_min=[-0.5245, 0.0, -0.2618]
+bounds_max=[0.4941, 0.7088, 0.2629]
+size(x,y,z)=[1.0187, 0.7088, 0.5247]
+wrote spot_real_full.stl

@@ -1,0 +1,49 @@
+{
+  "model_glb": {
+    "url": "https://ddd3ad329df048bc58dd2a3d168f30cd.r2.cloudflarestorage.com/otoy-ai-private-staging/6d25f103-ed5f-4b2f-8c11-d270c890a33d/113383c1-4b82-4a15-920f-f175f626c48a?response-content-disposition=attachment%3B%20filename%3D%22113383c1-4b82-4a15-920f-f175f626c48a%22&X-Amz-Expires=259200&X-Amz-Date=20260620T062013Z&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=0002480bcbb95812a5f73a872252f23d%2F20260620%2Fauto%2Fs3%2Faws4_request&X-Amz-SignedHeaders=host&X-Amz-Signature=e381e9369a612e4c9e3a12bf7b51297866ce71f7d4f35080a667fe8ba2e6c204",
+    "content_type": "model/gltf-binary",
+    "file_name": "model.glb",
+    "file_size": 37089820
+  },
+  "thumbnail": {
+    "url": "https://ddd3ad329df048bc58dd2a3d168f30cd.r2.cloudflarestorage.com/que-media/other/1781936417665-ajj0wd.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=3ded8ea8526f5380c76e0b9bb409b42f%2F20260620%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260620T062018Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=d77f2094023762be442286dc4cdbc160f718f584513dcdad48957d2f2fb90c53",
+    "content_type": "image/png",
+    "file_name": "preview.png",
+    "file_size": 101669
+  },
+  "model_urls": {
+    "glb": {
+      "url": "https://ddd3ad329df048bc58dd2a3d168f30cd.r2.cloudflarestorage.com/que-media/other/1781936419129-8nk69r.glb?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=3ded8ea8526f5380c76e0b9bb409b42f%2F20260620%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260620T062021Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=921ac08682c368db9c851fff54a456f902f00273242c89e5087be34ca9a335c3",
+      "content_type": "model/gltf-binary",
+      "file_name": "model.glb",
+      "file_size": 37089820
+    },
+    "fbx": null,
+    "obj": {
+      "url": "https://ddd3ad329df048bc58dd2a3d168f30cd.r2.cloudflarestorage.com/que-media/other/1781936421735-qb25qz.obj?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=3ded8ea8526f5380c76e0b9bb409b42f%2F20260620%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260620T062024Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=2c1f73921434a1e8d57a815d0c1fc24811cea842e93f6cdeb8371ca7bd265e35",
+      "content_type": "model/obj",
+      "file_name": "f6b772e699349b0042c8fe1f2506b4d4.obj",
+      "file_size": 35534683
+    },
+    "mtl": {
+      "url": "https://ddd3ad329df048bc58dd2a3d168f30cd.r2.cloudflarestorage.com/que-media/other/1781936425149-nn5t2j.mtl?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=3ded8ea8526f5380c76e0b9bb409b42f%2F20260620%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260620T062026Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b4f6330cf6480c48b7ed3bd1bec6418391c68eeff3e34072dc1afc62d2d5c63a",
+      "content_type": "text/plain",
+      "file_name": "material.mtl",
+      "file_size": 88
+    },
+    "texture": {
+      "url": "https://ddd3ad329df048bc58dd2a3d168f30cd.r2.cloudflarestorage.com/que-media/other/1781936426742-ylzf6t.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=3ded8ea8526f5380c76e0b9bb409b42f%2F20260620%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260620T062028Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=6c7ec18ecb7a427f35ffc057c43d622923a5f03828600281b0dc8bf3930c431e",
+      "content_type": "image/png",
+      "file_name": "texture_20250901.png",
+      "file_size": 20104626
+    },
+    "usdz": null
+  },
+  "seed": null,
+  "_render": {
+    "job_id": "3b95a14d-6956-4029-85ea-cc26b615a2bc",
+    "outputs": [
+      "https://ddd3ad329df048bc58dd2a3d168f30cd.r2.cloudflarestorage.com/otoy-ai-private-staging/6d25f103-ed5f-4b2f-8c11-d270c890a33d/113383c1-4b82-4a15-920f-f175f626c48a?response-content-disposition=attachment%3B%20filename%3D%22113383c1-4b82-4a15-920f-f175f626c48a%22&X-Amz-Expires=259200&X-Amz-Date=20260620T062013Z&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=0002480bcbb95812a5f73a872252f23d%2F20260620%2Fauto%2Fs3%2Faws4_request&X-Amz-SignedHeaders=host&X-Amz-Signature=e381e9369a612e4c9e3a12bf7b51297866ce71f7d4f35080a667fe8ba2e6c204"
+    ]
+  }
+}

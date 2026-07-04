@@ -1,0 +1,10 @@
+{
+  "status": "IN_QUEUE",
+  "request_id": "019ee3b3-23e5-7212-b39c-24ad1edaf155",
+  "response_url": "https://que2.otoy.studio/r2/otoy-studio/hunyuan-3d/requests/019ee3b3-23e5-7212-b39c-24ad1edaf155",
+  "status_url": "https://que2.otoy.studio/r2/otoy-studio/hunyuan-3d/requests/019ee3b3-23e5-7212-b39c-24ad1edaf155/status",
+  "cancel_url": "https://que2.otoy.studio/r2/otoy-studio/hunyuan-3d/requests/019ee3b3-23e5-7212-b39c-24ad1edaf155/cancel",
+  "logs": null,
+  "metrics": {},
+  "queue_position": 0
+}

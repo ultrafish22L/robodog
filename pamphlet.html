@@ -131,6 +131,14 @@
     .burst{animation:pop .9s ease-out both}
     @keyframes pop{0%{transform:scale(.4) rotate(-20deg);opacity:0}60%{transform:scale(1.12) rotate(4deg)}100%{transform:scale(1) rotate(0);opacity:1}}
   }
+  /* PDF: one continuous sheet (kit-manual poster) instead of chopped Letter pages */
+  @page{size:272mm 742mm;margin:0}
+  @media print{
+    .kit{max-width:none;margin:0}
+    .burst{animation:none}
+    .panel,.step,.part,.key,.cut,.dis,.runner,.steps,.legend,.mast{break-inside:avoid}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>

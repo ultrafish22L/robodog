@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+_*.png
+_*.npy
+_pybullet_install.log

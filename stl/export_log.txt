@@ -1,0 +1,17 @@
+STL EXPORT v28 (bed-fit + reinforce + servo mounting + cavity + wire routing + model-cut pockets + PIN + L/R MIRRORS) -> stl/
+======================================================================
+sm3sg90_frame              solids=1  245 x 68 x 50 mm  tris=3936  OK  clean
+sm3sg90_coxa               solids=1  24 x 27 x 28 mm  tris=2984  OK  clean
+sm3sg90_coxa_mir           solids=1  24 x 27 x 28 mm  tris=2984  OK  clean
+sm3sg90_femur              solids=1  22 x 33 x 109 mm  tris=6958  OK  clean
+sm3sg90_femur_mir          solids=1  22 x 33 x 109 mm  tris=6958  OK  clean
+sm3sg90_tibia              solids=1  28 x 39 x 116 mm  tris=2414  OK  clean
+sm3sg90_tibia_mir          solids=1  28 x 39 x 116 mm  tris=2412  OK  clean
+sm3sg90_tibia_rear         solids=1  28 x 39 x 116 mm  tris=2414  OK  clean
+sm3sg90_tibia_rear_mir     solids=1  28 x 39 x 116 mm  tris=2414  OK  clean
+sm3sg90_boot_TPU           solids=1  23 x 23 x 21 mm  tris=1304  OK  clean
+sm3sg90_pin                solids=1  15 x 9 x 9 mm  tris=116  OK  clean
+sm3sg90_dummy_688          solids=1  16 x 16 x 5 mm  tris=208  OK  clean
+sm3sg90_dummy_684          solids=1  9 x 9 x 4 mm  tris=208  OK  clean
+QTY per dog: frame x1 | coxa+coxa_mir x2 ea | femur+femur_mir x2 ea | tibia/tibia_mir/tibia_rear/tibia_rear_mir x1 ea | boot x4 | pin x4
+orientation: femur/tibia print FLAT-INBOARD-FACE down; coxa on its bearing face; boot=flexible TPU; rest rigid ABS

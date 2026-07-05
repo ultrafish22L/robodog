@@ -8,6 +8,7 @@ __pycache__/
 
 # FreeCAD backups
 *.FCStd1
+*.FCBak
 
 # Regenerable FreeCAD render outputs (re-create by running dog.py)
 ref/iter/

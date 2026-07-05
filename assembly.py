@@ -13,7 +13,7 @@ try:
     nm="assembly"
     if nm in list(App.listDocuments()): App.closeDocument(nm)
     d=App.newDocument(nm)
-    shown=list(parts)+[("lid",topp,BODYT,0),("tub",botp,BODYB,0),("facep",face,FACE,0)]
+    shown=list(parts)+[("lid",topp,BODYT,0),("tub",botp,BODYB,0),("head",head,(.92,.60,.10),0),("rump",rump,(.92,.60,.10),0),("facep",face,FACE,0)]
     objs={}
     for n,q,c,t in shown:
         o=d.addObject("Part::Feature",n); o.Shape=q
@@ -27,7 +27,7 @@ try:
         getattr(gv,"view"+vn)(); Gui.SendMsgToActiveView("ViewFit")
         fp=OUT+"/_as_%s.png"%vn; gv.saveImage(fp,SZ,SZ,"White"); pl.append((fp,lab))
     for n,o in objs.items():                       # X-ray: fade the covers to reveal internals
-        if n in ("lid","tub","facep"):
+        if n in ("lid","tub","head","rump","facep"):
             try: o.ViewObject.Transparency=80
             except Exception: pass
     d.recompute(); gv.viewAxonometric(); Gui.SendMsgToActiveView("ViewFit")
@@ -48,20 +48,20 @@ try:
         except Exception: return -1.0
     def bbx(s): b=s.BoundBox; return "X[%.0f,%.0f] Y[%.0f,%.0f] Z[%.0f,%.0f]"%(b.XMin,b.XMax,b.YMin,b.YMax,b.ZMin,b.ZMax)
     legparts=[(n,q) for n,q,c,t in parts if n.split('_')[0] in ('sh','fe','ti','bt','s0','s1','s2')]
-    cover=topp.fuse(botp)
-    L=["ASSEMBLY AUDIT  (units mm, mm^3)  -- v22 frame + covers","="*64]
+    panels=[("trunk_lid",topp),("trunk_tub",botp),("head",head),("rump",rump)]
+    L=["ASSEMBLY AUDIT  (units mm, mm^3)  -- v26 frame + wire routing + 4-module covers","="*64]
 
-    L.append("[BODY PANELS]")
-    for nm2,pn in (("top lid",topp),("bottom tub",botp)):
-        L.append("  %-11s valid=%s  solids=%d shells=%d  %s  vol=%.0f"%(
-            nm2,pn.isValid(),len(pn.Solids),len(pn.Shells),bbx(pn),pn.Volume))
+    L.append("[BODY PANELS]  4 modules (trunk lid+tub, head, rump); bed 256")
+    for nm2,pn in panels:
+        b=pn.BoundBox; fit="OK" if max(b.XLength,b.YLength,b.ZLength)<=256 else "OVER-BED!"
+        L.append("  %-10s valid=%s solids=%d  %3.0f x %3.0f x %3.0f  %-9s ^FRAME=%.0f (want ~0)"%(
+            nm2,pn.isValid(),len(pn.Solids),b.XLength,b.YLength,b.ZLength,fit,ov(pn,FR)))
     L.append("  lid^tub overlap ......... %.1f   (want 0: split by the reveal gap)"%ov(topp,botp))
-    L.append("  cover^FRAME ............. %.1f   (want ~0: cavity clears the frame)"%ov(cover,FR))
-    byt={}
-    for n,q in legparts:
-        k=n.split('_')[0]; byt[k]=byt.get(k,0.0)+ov(cover,q)
-    L.append("  cover^legs (4 corners summed, want 0 except hip pass-through):")
-    for k in sorted(byt): L.append("      %-4s %.0f"%(k,byt[k]))
+    L.append("  head^tub / rump^tub ..... %.1f / %.1f   (butt seam at x=+-70; >0 once snap/spigot lap is added)"%(ov(head,botp),ov(rump,botp)))
+    L.append("  panel^legs (want 0 except the hip pass-through openings, which pass sh/fe):")
+    for nm2,pn in panels:
+        row=" ".join("%s=%.0f"%(k,sum(ov(pn,q) for n,q in legparts if n.split('_')[0]==k)) for k in ("sh","fe","ti","bt","s0","s1","s2"))
+        L.append("      %-10s %s"%(nm2,row))
     L.append("  wall nominal = %.1f mm (build_body inset); frame-cut may thin it locally"%WALL)
 
     L.append("[CANTILEVER LATCHES]  6 fingers (tub) -> release windows (lid), toolless")

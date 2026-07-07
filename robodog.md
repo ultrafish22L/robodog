@@ -47,7 +47,23 @@ Do **not** fatten the whole leg to hide the servo — that has repeatedly produc
 - **Coupling:** heat-set metal spline insert + M2 centre screw on each driven part (bore sized to the user's actual salvaged spline). No printed spline teeth.
 - **Retention:** servo held by snap-fit + crush ribs.
 - **Electronics:** Pi Pico / Pico W + PCA9685; 1S LiPo + 5 V boost.
-- **Print:** ABS, enclosed printer, 0.4 mm nozzle. Torque is marginal (~1.8 kg·cm) — keep it light; MG90S (~2.2 kg·cm) is a drop-in metal-gear upgrade, same footprint.
+- **Print:** ASA, enclosed printer, 0.4 mm nozzle (see **3D printing** below). Torque is marginal (~1.8 kg·cm) — keep it light; MG90S (~2.2 kg·cm) is a drop-in metal-gear upgrade, same footprint.
+
+## 3D printing (ASA)
+**Material — ASA.** Enclosed chamber, brim on every part, no draft on the door (ASA warps more than PLA — anchor layer 1). **A PLA test-fit is fine** for checking tolerances/assembly before committing ASA, but PLA is only a fit mule (won't take heat/load). Watch the shrink difference: **press/friction fits that are just-snug in PLA come out TIGHTER in ASA** — so tune the press fits (bearing cup, horn capture, femur insert) on the PLA-loose side and expect ASA a hair tighter.
+
+**General:** 0.4 mm nozzle, 0.2 mm layers, **3–4 perimeters** (at this scale the walls carry the load, not the infill), **gyroid infill** everywhere (isotropic — no weak axis, which matters at the joint housings). ~0.15 mm elephant-foot comp on parts with first-layer features (coxa spline face, femur wire groove).
+
+**Per-part — min gyroid infill + notes** (infill is a floor; go higher if a print feels weak):
+- **Coxa** (`sm3sg90_coxa.stl`) — **35 %**. **PRINT −X FACE DOWN** (spline-hole face on the bed). **PAUSE at 4.5 mm** (top of the print-in-place horn disk-chamber, one layer before the 2 mm roof closes) and **drop the round SG90 horn in** — splined shaft pointing down into the already-printed spline hole; resume and the roof layer captures it (no glue/fastener). Bearing cup crush-ribs are a **press-fit for the 688** (they carry a +X lead-in taper so it starts square). Snap-clip slots + servo pocket print support-free in this orientation. Servo drops in from +Y after printing; cover snaps on last.
+- **Coxa cover / CLIP** (`sm3sg90_coxa_cover.stl`) — **15 %** (thin/hollow — walls do the work). Print **outer face down** so the finger→leg→nub cantilever prints unsupported; don't over-squish layer 1 or the nub loses catch depth.
+- **Femur insert / RING** (`sm3sg90_coxa_insert.stl`) — **50 %** (tiny friction wear surface; solid is fine). Print **seat-face down**; press-fits into the cover recess (0.1 mm). This is the *tunable* friction part — reprint in a different infill/material to change drag without touching coxa or cover.
+- **Frame** — **40 %** (structural backbone / bearing-axle carrier). Print **deck-up**; the L/R shoulder girdle + gussets take the Ø8 splay pin; keep the M2 tab-screw pilots.
+- **Femur** — **30 %**. Wire groove runs up the inboard print face → orient that face outward; brim + elephant-foot comp so the groove first layers stay clean. Servo2 (knee) pocket + 688/684 bearing seats.
+- **Tibia / tibia_rear** — **25 %**. Slim blade — print **on its side (flat)** for strength along the length.
+- **Body covers** (head / rump / trunk_lid / trunk_tub) — **12 %** (cosmetic; a couple perimeters give the cantilever latches their spring).
+- **Splay pin** — **solid / 100 %** (6 walls). Tiny, must not shear.
+- **Boot** — **TPU, separate plate.** 3 walls / ~20 % gyroid for grip + cushion; **print at the same scale as the foot-end** or it won't clip on.
 
 ## The joint mechanism (VERIFIED — reuse it, don't reinvent)
 Built and gate-checked in `leg4.py` / `leg5.py`. Frame: **bone along X, hinge axis Y, profile in Z.**

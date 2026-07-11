@@ -11,6 +11,7 @@ OUT=r"C:/ultrafish/robodog/ref/iter"
 
 try:
     WALL=2.0; BACK=8.0                 # BACK = face-to-back wall behind the servo (rotation is Z-limited, Y free)
+    CLIPGROW=3.0                       # grow top+bottom Z by this so the snap clips RECESS FLUSH (not proud); +2*this to block height
     S1=servo_cut("s1")                 # real SG90 mesh (grown 0.25/side) = the pocket cutter
     sb=S1.BoundBox
     FRONT=31.0                         # +Y front (femur) face; OPEN so the servo inserts from the front
@@ -32,7 +33,7 @@ try:
     hrn_face=hrn_disk_x0-HRN_ST       # -X face / spline-hole mouth  (x=93.0)
     bx0,bx1 = hrn_face, brg_x0+BRG_D  # both ends extended to house horn (-X) and bearing (+X)
     by0,by1 = sb.YMin-BACK, FRONT      # thick back wall (Y is free); front open at FRONT
-    bz0,bz1 = sb.ZMin-WALL, sb.ZMax+WALL
+    bz0,bz1 = sb.ZMin-WALL-CLIPGROW, sb.ZMax+WALL+CLIPGROW   # taller block: room to recess the clips flush above/below the servo
     BLK=box(bx1-bx0, by1-by0, bz1-bz0, v(bx0,by0,bz0))
 
     # pocket = servo model (form-fit body) + a FRONT CHANNEL as tall as the tabs (full servo Z) so the tabs
@@ -80,10 +81,15 @@ try:
             x0=min(xtip,xw+0.3*sgn)
             COXA=COXA.fuse(box(abs((xw+0.3*sgn)-xtip),(FRONT-3.0)-(sb.YMin+3.0),1.2,v(x0,sb.YMin+3.0,zc-0.6)))
     COXA=COXA.removeSplitter(); s=COXA.Solids; COXA=max(s,key=lambda q:q.Volume) if len(s)>1 else COXA
-    # === CORNERS: chamfer every outer block edge as DEEP as it can while keeping >=CLR to any feature (each cut
-    #     wedge lies in a ball of radius d about the edge, so d < clearance => wall stays >=CLR: provably safe).
-    #     Then ROUND with VARIABLE radii scaled to local clearance. Pockets stay sharp. ===
-    CLR=2.0
+    # === CORNERS: EVEN, CONSISTENT chamfer + rounding (user: even out the back / consistent everywhere).
+    #     ONE chamfer depth (CHAMF) on every outer block edge with clearance headroom for it, then ONE fillet
+    #     radius (ROUND) on the remaining exterior edges. (Was a per-edge clearance-scaled scheme -- chamfers 2..11,
+    #     fillets 0.5..3 -- that left the back looking ragged.) Pockets / +Y flush cover-seat / press-fit bore lips
+    #     stay sharp. Every chamfer/fillet is validity-guarded -- makeChamfer/makeFillet can "succeed" yet return a
+    #     corrupt spike that silently drops geometry -- and retried one edge at a time if the batch op fails.
+    CLR=2.0                         # min wall kept to any internal feature (the feats below are grown by CLR)
+    CHAMF=3.0                       # ONE chamfer depth for all outer block corners
+    ROUND=1.0                       # ONE fillet radius for the remaining exterior edges
     feats=[box(sb.XLength+2*CLR, sb.YLength+2*CLR, sb.ZLength+2*CLR, v(sb.XMin-CLR,sb.YMin-CLR,sb.ZMin-CLR)),  # servo
            box(WSW+2*CLR, (FRONT-ws_y0)+2*CLR, (bz1-ws_z0)+2*CLR, v(xc-WSW/2-CLR, ws_y0-CLR, ws_z0-CLR)),      # wire slot
            cyl(BRG_OD/2+CLR, BRG_D+2*CLR, v(brg_x0-CLR, SPY, SPZ), X),                                          # bearing cup
@@ -92,10 +98,10 @@ try:
     FEAT=feats[0]
     for ff in feats[1:]: FEAT=FEAT.fuse(ff)
     FEAT=FEAT.removeSplitter()
-    def eclr(e):
+    def eclr(e):                                           # edge -> distance to the (CLR-grown) feature envelope
         try: return e.distToShape(FEAT)[0]
         except Exception: return 0.0
-    def _oplane(f,shape):
+    def _oplane(f,shape):                                  # is face an outer axis-aligned bbox plane?
         srf=f.Surface
         if srf.TypeId!='Part::GeomPlane': return False
         ax=srf.Axis; bb=shape.BoundBox
@@ -104,57 +110,66 @@ try:
                 c=f.Vertexes[0].Point[i]
                 return abs(c-getattr(bb,nm+'Min'))<0.06 or abs(c-getattr(bb,nm+'Max'))<0.06
         return False
-    def blk_edges(shape):
+    def blk_edges(shape):                                  # outer block edges: both faces are bbox planes
         return [e for e in shape.Edges if len(shape.ancestorsOfType(e,Part.Face))==2
                 and all(_oplane(f,shape) for f in shape.ancestorsOfType(e,Part.Face))]
-    for lvl in range(11,1,-1):                 # deep first; chamfered edges leave blk_edges() so no double-cut
-        grp=[e for e in blk_edges(COXA) if int(round(max(0.0,eclr(e)-0.3)))==lvl]
-        if grp:
-            try: COXA=COXA.makeChamfer(float(lvl),grp).removeSplitter()
-            except Exception: pass
-    # ROUND EVERY EXTERIOR EDGE (user: "all edges need rounding").
-    # NOTE: the press-fit bore mouths (bearing cup + horn spline) are LEFT SHARP (user) -> clean seat/register;
-    #       the crush ribs and the horn drop-in carry the lead-in, not a bore fillet. So the bore-lip pass is removed.
-    # (b) all exterior planar-planar edges: clearance-scaled radius, 0.5 floor -> nothing sharp.
-    #     Only truly on-feature edges (servo mesh pocket / bore lips, clearance==0) are left out.
-    def rtgt(e):
-        c=eclr(e)
-        if c<0.05: return 0.0
-        if c>=4.0: return 3.0
-        if c>=2.5: return 2.0
-        if c>=1.3: return 1.0
-        return 0.5
-    def on_front(e):                                       # +Y face edges stay SHARP -> flush clip seat (user)
+    def on_front(e):                                       # +Y-face edges: keep SHARP -> flush cover seat (user)
         return all(abs(vt.Point.y-FRONT)<0.2 for vt in e.Vertexes)
-    def fillet_bucket(shape,r):
-        es=[e for e in shape.Edges
-            if len(shape.ancestorsOfType(e,Part.Face))==2
-            and all(f.Surface.TypeId=='Part::GeomPlane' for f in shape.ancestorsOfType(e,Part.Face))
-            and not on_front(e)
-            and abs(rtgt(e)-r)<1e-6]
-        if not es: return shape
-        try: return shape.makeFillet(r,es).removeSplitter()
+    def _keep(pre,res,frac=0.5):                           # keep an edge-op result only if it's a valid, non-collapsed solid
+        res=res.removeSplitter()                           # frac = min fraction of pre-op volume to accept (0.8 protects CLIP hooks)
+        return res if (res.isValid() and res.Solids and res.Volume>pre.Volume*frac) else pre
+    def edge_op(shape,edges,kind,val,frac=0.5):            # kind='makeChamfer'|'makeFillet'; batch, else one-at-a-time
+        if not edges: return shape
+        try: return _keep(shape, getattr(shape,kind)(val,edges), frac)
         except Exception: pass
-        for p in [e.CenterOfMass for e in es]:                 # fallback: one at a time, skip failures
+        for p in [e.CenterOfMass for e in edges]:          # each op mutates topology -> re-find the edge by its centre
             cand=[e for e in shape.Edges if e.CenterOfMass.distanceToPoint(p)<1e-4]
             if cand:
-                try: shape=shape.makeFillet(r,[cand[0]]).removeSplitter()
+                try: shape=_keep(shape, getattr(shape,kind)(val,[cand[0]]), frac)
                 except Exception: pass
         return shape
-    for rr in (3.0,2.0,1.0,0.5):
-        COXA=fillet_bucket(COXA,rr)
+    # uniform chamfer: every outer block edge with room for CHAMF (headroom = eclr-0.3); this evens out the back
+    COXA=edge_op(COXA, [e for e in blk_edges(COXA) if eclr(e)-0.3 >= CHAMF-1e-9], 'makeChamfer', CHAMF)
+    # BEARING-side bottom catch-up: the front-bottom edge on the bearing (+X) end sits ~0.12mm inside the CHAMF+0.3
+    # headroom the pass above wants, so it stayed sharp while its neighbours (back-bottom, -X bottom) got the 3.0
+    # chamfer -> visibly unmatched at that corner. Re-run the SAME CHAMF on any still-sharp BOTTOM block edge that
+    # clears the CLR-grown feature envelope (eclr>=CHAMF -> >=CLR(2mm) wall kept), skipping sliver fragments. Guarded.
+    _zmin=COXA.BoundBox.ZMin
+    _bot=[e for e in blk_edges(COXA)
+          if all(abs(vt.Point.z-_zmin)<0.3 for vt in e.Vertexes) and e.Length>=1.0 and eclr(e) >= CHAMF-1e-9]
+    COXA=edge_op(COXA, _bot, 'makeChamfer', CHAMF)
+    # uniform rounding: EXTERIOR planar edges only -- outer block corners + the chamfer bevels (>=1 face is an outer
+    # bbox plane). NOT internal pocket/slot edges: filleting a concave internal edge ADDS material that bulges INTO
+    # the servo/feature envelope. Skip the +Y flush cover-seat face too.
+    def _ext(e):
+        fs=COXA.ancestorsOfType(e,Part.Face)
+        return (len(fs)==2 and all(f.Surface.TypeId=='Part::GeomPlane' for f in fs)
+                and any(_oplane(f,COXA) for f in fs) and not on_front(e))
+    COXA=edge_op(COXA, [e for e in COXA.Edges if _ext(e)], 'makeFillet', ROUND)
     # ============ SNAP COVER (external pry-off clips) + cover-tab servo retention ============
     # Cover (black) closes the +Y mouth and seats the yellow femur insert (ROUNDED bullnose contact). It snaps on via
-    # TWO EXTERNAL pry-off arms (inward barb into a blind detent); a bottom TAB reaches back onto the servo's mounting-
-    # tab FRONT face and retains the servo -> servo drops in free, cover locks it (NO internal coxa ear-lips).
+    # TWO EXTERNAL pry-off arms (inward barb into a blind detent); TWO TABS (top+bottom ears) reach back onto the servo's
+    # mounting-tab FRONT faces and cage the servo -> servo drops in free, cover locks it (NO internal coxa ear-lips).
     CLIP=None; RING=None
     try:
-        OX,OZ,HOLE=106.0,10.0,17.0          # servo output axis (X,Z, +Y); spline+butt clearance hole
+        OX,OZ=106.0,10.0                    # servo output axis (X,Z, +Y)
+        # The EXI S1123 has a BULKY ~12(X)x16(Z) top/output block (the SG90 tapers to a small boss) that pokes
+        # through the cover -> the output opening is a ROUNDED-RECT sized to clear it (SG90 then fits loose), and
+        # the femur ring is a slip-fit FRAME around that opening (not a press-fit round washer).
+        OPEN_X,OPEN_Z,OPEN_R=15.0,18.0,3.0  # rounded-rect output opening (clears the EXI block + ~1mm/side)
+        def rrect(wx,wz,r,ylen,y0,cx=None,cz=None):    # rounded-rect prism, centred (cx,cz)=(OX,OZ), extruded +Y from y0
+            cx=OX if cx is None else cx; cz=OZ if cz is None else cz
+            b=box(wx,ylen,wz,v(cx-wx/2.0,y0,cz-wz/2.0))
+            if r>0:
+                es=[e for e in b.Edges if len(e.Vertexes)==2
+                    and abs(e.Vertexes[0].X-e.Vertexes[1].X)<1e-6 and abs(e.Vertexes[0].Z-e.Vertexes[1].Z)<1e-6]
+                try: b=b.makeFillet(r,es).removeSplitter()
+                except Exception: pass
+            return b
         # --- FEMUR INSERT (separate yellow part): friction ring that seats in a recess in the (flat) cover.
         #     Bore Ø17; a concentric counterbore on its +Y face is the thrust-washer seat -> FRICTION now
         #     (femur rubs the raised rim), drop a small hobby thrust washer/bearing in the seat later. Swappable = tunable.
-        REC_OD,REC_DEP,INS_PROUD,INS_FIT=24.0,2.0,1.5,0.10   # insert OD, seat depth in cover, proud of face, friction clearance
-        TB_OD,TB_DEP=21.0,1.2                                 # thrust-washer seat (Ø17 bore x Ø21 x ~1.2): empty now, drop-in later
+        REC_OD,REC_DEP,INS_PROUD,REC_FIT=24.0,2.0,1.5,0.20   # ring seat OD/depth, proud rub, SLIP fit (no press) in the recess (OD<~27 face width)
         earY=max(S1.common(box(300,300,2.0,v(-150,-150,sb.ZMax-2.0))).BoundBox.YMax,   # +Z ear front face
                  S1.common(box(300,300,2.0,v(-150,-150,sb.ZMin))).BoundBox.YMax)       # -Z ear front face
         # cover outer face = butt top - 0.5
@@ -171,73 +186,138 @@ try:
         cover=Part.Face(ff[0].OuterWire); cover.translate(v(0,FRONT-cover.BoundBox.YMin,0))   # coxa face outline
         cover=cover.extrude(v(0,face_thk,0)); fb=ff[0].BoundBox
         cover=cover.fuse(box((sb.XMax+4.0)-(sb.XMin-4.0),face_thk,fb.ZMax-sb.ZMin,v(sb.XMin-4.0,FRONT,sb.ZMin)))
-        CLIP=cover.cut(cyl(HOLE/2.0,face_thk+2.0,v(OX,FRONT-1.0,OZ),Y))
-        WI=FACE_OUT-CWALL                                      # HOLLOW: keep front wall + bore rim + perimeter rim
+        CLIP=cover.cut(rrect(OPEN_X,OPEN_Z,OPEN_R,face_thk+2.0,FRONT-1.0))   # rounded-rect output opening (clears the EXI top block)
+        # HOLLOW the interior: keep front wall + bore-disk + perimeter rim. This also clears the servo BODY (the
+        # solid cover back face otherwise bites the servo ~0.2mm). The hollow leaves an INVALID BREP, but that is
+        # harmless now: the snap hooks are valid solids, the fillets are validity-guarded, and .fix() (below, after
+        # the trim) repairs the cover to a valid solid before any downstream shaping/export.
+        WI=FACE_OUT-CWALL
         _hol=box(fb.XLength-4.0,WI-FRONT,fb.ZLength-4.0,v(fb.XMin+2.0,FRONT,fb.ZMin+2.0))
         _hol=_hol.cut(cyl(REC_OD/2.0+2.0,WI-FRONT+2.0,v(OX,FRONT-1.0,OZ),Y))                    # leave a SOLID disk to host the insert recess
         CLIP=CLIP.cut(_hol)
-        # FLAT cover face + circular RECESS to seat the separate femur insert (the contact now lives on the insert)
-        CLIP=CLIP.cut(cyl(REC_OD/2.0+INS_FIT,REC_DEP+0.01,v(OX,FACE_OUT-REC_DEP,OZ),Y))         # friction seat (open +Y)
-        # build the INSERT (yellow): seat disk (OD REC_OD, seats REC_DEP into the cover) + a BULLNOSE contact ridge
-        # (rounded x-section torus, proud of the face) = the rounded femur contact; Ø17 bore (thrust-washer-bore ready
-        # -> a flat-seat variant of this swappable insert can take a small hobby thrust washer later).
-        _yb=FACE_OUT-REC_DEP
-        RCS=1.4; rc=HOLE/2.0+0.6+RCS                                     # ridge minor radius / centreline just outside the bore
-        RING=cyl(REC_OD/2.0,REC_DEP,v(OX,_yb,OZ),Y)                      # seat disk, flush to the cover face
-        _tor=Part.makeTorus(rc,RCS,v(OX,FACE_OUT,OZ),Y)                  # rounded contact ridge, proud of the face
-        _tor=_tor.cut(box(2*rc+8,RCS+2.0,2*rc+8,v(OX-rc-4,FACE_OUT-RCS-2.0,OZ-rc-4)))   # keep the proud (+Y) half
-        RING=RING.fuse(_tor).cut(cyl(HOLE/2.0,REC_DEP+RCS+2.0,v(OX,_yb-1.0,OZ),Y)).removeSplitter()   # + Ø17 through bore
+        # the retained bore-disk's servo-side face sits at FRONT and the EXI top face is ~0.22mm proud of it -> skim
+        # 0.6mm off the disk over the servo footprint (recess floor is back at FACE_OUT-REC_DEP, so ~1.5mm backing
+        # survives). Clears the servo with a single box cut (no fuse/fillet -> boolean stays clean).
+        CLIP=CLIP.cut(box(sb.XLength+2.0,0.6,sb.ZLength,v(sb.XMin-1.0,FRONT,sb.ZMin)))            # servo-top clearance relief
+        # FLAT cover face + round RECESS (Ø26) to seat the separate femur ring as a SLIP fit
+        CLIP=CLIP.cut(cyl(REC_OD/2.0+REC_FIT/2.0,REC_DEP+0.01,v(OX,FACE_OUT-REC_DEP,OZ),Y))     # ring recess (SLIP, open +Y)
+        # build the INSERT (yellow) = a SLIP-FIT thrust FRAME (was a press-fit round washer that wouldn't seat).
+        # Ø26 seat disk drops into the recess (no press); a flat rim stands INS_PROUD as the femur rub face; a
+        # ROUNDED-RECT hole clears the EXI top block. The femur back holds it seated (swappable, tunable drag).
+        _yb=FACE_OUT-REC_DEP; RIM_OD=REC_OD-2.0                          # proud rim slightly inset from the seat
+        RING=cyl(REC_OD/2.0,REC_DEP,v(OX,_yb,OZ),Y)                      # seat disk (slip fit, flush to face)
+        RING=RING.fuse(cyl(RIM_OD/2.0,INS_PROUD+0.001,v(OX,FACE_OUT,OZ),Y))           # flat-topped proud rub rim
+        RING=RING.cut(rrect(OPEN_X+1.0,OPEN_Z+1.0,OPEN_R,REC_DEP+INS_PROUD+2.0,_yb-1.0)).removeSplitter()  # rounded-rect clearance hole
+        # CHAMFER the TOP of the rub rim (femur-contact face): bevel ONLY the outer rim top edge (the RIM_OD
+        # circle/arcs at the top plane) -> clean lead-in, no sharp lip on the rub face. NOT the inner rrect hole
+        # (that's clearance, and chamfering it together with the outer edge is what silently killed the old 0.4).
+        # Guard the chamfer (makeChamfer can "succeed" yet return an invalid solid) and revert if it goes bad.
+        CHM=0.6; _pre=RING
+        try:
+            _te=[e for e in RING.Edges
+                 if abs(e.CenterOfMass.y-(FACE_OUT+INS_PROUD))<0.05                                  # at the top plane
+                 and type(e.Curve).__name__=='Circle' and abs(e.Curve.Radius-RIM_OD/2.0)<0.2]        # outer rim only
+            if _te:
+                _rc=RING.makeChamfer(CHM,_te).removeSplitter()
+                RING=_rc if (_rc.isValid() and _rc.Solids and _rc.Volume>_pre.Volume*0.5) else _pre
+        except Exception:
+            RING=_pre; print("RING top chamfer skipped:\n"+traceback.format_exc())
         # SIMPLE HOOK CLIP (one flush arm per side, like before, with a hook on the end that snaps into the coxa):
         # a long flush arm runs back from the cover along the coxa top/bottom; at its free tip it bends 90 deg
         # DOWN into the coxa (the hook leg), and a ROUNDED NUB on that leg snaps into a coxa CAVITY. Push the
         # cover -Y: the arm flexes, the leg rides in and the nub clicks into the cavity; +Y pull is held by the
         # leg captured in its slot + the nub in the cavity. Flex the arm out to pop it back off.
-        # ============ CANTILEVER SNAP: long FINGER -> 90-deg LEG into coxa -> rounded NUB on cover-facing face ==
-        # The finger flexes; as the cover seats, the leg's nub cams past its coxa recess. An ANGLED RELIEF on the
-        # coxa wall behind the leg (opposite the nub) gives the leg room to flex AWAY from the cover to clear it.
-        AW   = 10.0        # hook width (X)
-        ATIP = 14.0        # finger free tip / 90-deg corner (-Y end)
-        FT   = 1.2         # finger thickness (Z) - thin so it FLEXES (like the earlier fingers)
-        LEGY = 1.6         # leg thickness in Y (the 90-deg turn down into the coxa)
-        NUBR = 0.8         # rounded snap nub radius, on the leg's cover-facing (+Y) face
-        NUBZ = 2.8         # nub CENTRE depth on the leg
-        LEGD = NUBZ+NUBR   # leg STOPS at the far side of the nub (does not extend beyond it)
-        TOL  = 0.3         # snap-fit tolerance
-        RELIEF = NUBR+TOL  # -Y relief clearance (away from the nub) = nub radius + tol; uniform, full leg depth
-        RND  = 0.5         # profile rounding radius
-        def _hbox(up,y0,ylen,d0,d1,gx=0.0,gy=0.0,gz=0.0):   # box d0..d1 deep into the coxa from the up/down face
+        # ============ FLUSH CHUNKY SNAP (user: "clips must be FLUSH with the coxa, even if the coxa gets bigger") ====
+        # The block grew by CLIPGROW top+bottom (line ~14) so the 3.5mm beam RECESSES fully and its outer face sits FLUSH
+        # with the (taller) coxa face - nothing proud. Growing the block also pushed the finger+leg FURTHER from the servo
+        # (wall under finger = WALL+CLIPGROW-BEAM = 1.5mm, was 1.0). Leg/nub depths are held constant BELOW the finger
+        # underside so the snap geometry survives the deeper recess. The old PROUD Z-gusset is replaced by a FLUSH lateral
+        # (X) root widening (+ R1.0 fillet) for cover-handling strength. NB: flush = no proud lip -> release by lifting the
+        # finger tip out of its channel.
+        AW    = 14.0       # hook width (X) - CHUNKY
+        ATIP  = 12.0       # finger free tip / 90-deg corner (-Y end); longer beam keeps flex strain <1%
+        BEAM  = 3.5        # finger thickness (Z) - CHUNKY (1.2 then 2.6 both snapped)
+        FT_IN = BEAM       # FULL beam recessed -> flush top after trim; block grew CLIPGROW to keep wall to servo
+        FT_OUT= 0.8        # small PROUD LEAD: the finger/gusset are built this far above the top so the fuse onto the
+                           # hollow cover is clean (a coplanar-with-the-top fuse corrupts the boolean + drops the hook);
+                           # the lead is CUT OFF later (flush trim), so the clip ends up exactly flush with the coxa face
+        LATG  = 3.0        # FLUSH lateral (X) root gusset: widen the beam by LATG/side at the cover, taper to 0 over GLEN
+        GLEN  = 11.0       # lateral-gusset run back along the finger (Y)
+        LEGY  = 3.5        # leg thickness in Y (the 90-deg turn) - CHUNKY (kills the weak tip)
+        NUBR  = 1.0        # snap-nub radius (chunkier catch)
+        NUB_BELOW = 1.6    # nub CENTRE this far below the finger underside (snap geometry, held constant vs FT_IN)
+        LEG_BELOW = NUB_BELOW+NUBR   # leg tip stops at the nub far edge (=2.6 below the underside)
+        NUBZ  = FT_IN+NUB_BELOW      # nub centre depth from the top face
+        LEGD  = FT_IN+LEG_BELOW      # leg depth from the top face; clears servo@z18.32 under the leg (now w/ more margin)
+        TOL   = 0.3        # snap-fit tolerance
+        RELIEF= NUBR+TOL   # -Y relief clearance (away from the nub)
+        RND   = 1.0        # fillet on all hook edges
+        def _slab(up,y0,ylen,zin,zout,gx=0.0,gy=0.0):      # slab Y[y0,y0+ylen]; Z from zface-up*zin (rebate) to zface+up*zout (proud)
             zface=bz1 if up>0 else bz0
-            za,zb=zface-up*d0,zface-up*d1; zl,zh=sorted((za,zb))
-            zl-=gz; zh+=gz
-            if up>0: zh=min(zh,zface)
-            else:    zl=max(zl,zface)
+            za=zface-up*zin; zb=zface+up*zout; zl,zh=sorted((za,zb))
+            zl-=gy; zh+=gy                                  # grow Z by the clearance too (0 for the clip part itself)
             return box(AW+2*gx, ylen+2*gy, zh-zl, v(OX-AW/2.0-gx, y0-gy, zl))
-        def _hook(up,gx=0.0,gy=0.0,gz=0.0,rounded=False):
+        def _lwedge(up,y0,ylen,gw,g=0.0):                  # FLUSH lateral root gusset in the beam's Z-band: width AW at
+            zface=bz1 if up>0 else bz0                     #   y0 -> AW+2*gw at y0+ylen (cover). Stays within the recess -> flush.
+            za=zface-up*FT_IN; zb=zface+up*FT_OUT; zl,zh=sorted((za,zb)); zl-=g; zh+=g   # incl. proud lead (trimmed later)
+            xw=AW/2.0+g
+            p=[v(OX-xw,y0-g,zl), v(OX+xw,y0-g,zl), v(OX+xw+gw,y0+ylen+g,zl), v(OX-xw-gw,y0+ylen+g,zl), v(OX-xw,y0-g,zl)]
+            return Part.Face(Part.makePolygon(p)).extrude(v(0,0,zh-zl))
+        def _hook(up,g=0.0,rounded=False):
             zface=bz1 if up>0 else bz0
-            finger=_hbox(up, ATIP, FACE_OUT-ATIP, 0.0, FT,   gx,gy,gz)  # long FINGER from the cover (flexes)
-            leg   =_hbox(up, ATIP, LEGY,          0.0, LEGD, gx,gy,gz)  # 90-deg turn straight DOWN into the coxa
-            yf=ATIP+LEGY                                                 # leg face that looks back toward the cover (+Y)
-            nz=zface-up*NUBZ
-            nub=cyl(NUBR+gz, AW+2*gx, v(OX-AW/2.0-gx, yf, nz), X)       # rounded NUB on that cover-facing face
-            h=finger.fuse(leg).fuse(nub).removeSplitter()
+            finger=_slab(up, ATIP, FACE_OUT-ATIP, FT_IN, FT_OUT, g,g)   # thick FINGER (rebate + proud)
+            leg   =_slab(up, ATIP, LEGY,          LEGD,  0.0,    g,g)   # beefy 90-deg turn DOWN into the coxa
+            yf=ATIP+LEGY; nz=zface-up*NUBZ
+            nub=cyl(NUBR+g, AW+2*g, v(OX-AW/2.0-g, yf, nz), X)         # rounded NUB on the cover-facing (+Y) face
+            h=finger.fuse(leg).fuse(nub)
+            try: h=h.fuse(_lwedge(up, FRONT-GLEN, FACE_OUT-(FRONT-GLEN), LATG, g))   # FLUSH lateral root gusset
+            except Exception: pass
+            h=h.removeSplitter()
             if rounded:
-                try: h=h.makeFillet(RND,[e for e in h.Edges]).removeSplitter()
-                except Exception:
-                    try: h=h.makeFillet(RND*0.5,[e for e in h.Edges]).removeSplitter()
+                # Round ALL hook edges (soft catch). makeFillet can "succeed" without raising yet return an
+                # INVALID solid (seen on the up=-1 mirror: a corrupt spike to z-25 that then poisons the fuse and
+                # drops the whole hook). So VALIDATE each result and fall back: full radius -> half -> unfilleted.
+                # An unfilleted hook has sharp edges but is a clean valid solid, and the snap still works.
+                _h0=h
+                for _r in (RND, RND*0.5):
+                    try:
+                        _hf=h.makeFillet(_r,[e for e in h.Edges]).removeSplitter()
+                        if _hf.isValid() and _hf.Solids and _hf.Volume>_h0.Volume*0.5:
+                            h=_hf; break
                     except Exception: pass
+                else:
+                    h=_h0                                  # both fillets bad -> keep the valid unfilleted hook
             return h
         for up in (1,-1):
             try: CLIP=CLIP.fuse(_hook(up,rounded=True))
             except Exception: print("clip hook %d skipped\n"%up+traceback.format_exc())
-        # SERVO RETAINER TAB (cover, bottom): a rib on the cover inner face reaching back onto the servo bottom mounting-
-        # tab FRONT face (earY) -> blocks +Y pull-out. The cover retains the servo now (internal coxa ear-lips removed).
+        # SERVO RETAINER TABS (cover, BOTH ears): ribs on the cover inner face reaching back onto EACH servo mounting-
+        # tab FRONT face -> cages the servo against +Y pull-out at top AND bottom. A single bottom tab let the servo
+        # pivot about it and lift its top ear out. Each tab reaches only to its OWN ear front (earY_top/earY_bot) and
+        # lives in that ear's top/bottom-Z band -> the top tab stays clear of the EXI output/top block (validated).
         TABW,TABZ=12.0,3.0
-        CLIP=CLIP.fuse(box(TABW,FACE_OUT-earY,TABZ,v(OX-TABW/2.0,earY,sb.ZMin)))
+        earY_bot=S1.common(box(300,300,2.0,v(-150,-150,sb.ZMin))).BoundBox.YMax        # -Z ear front face
+        earY_top=S1.common(box(300,300,2.0,v(-150,-150,sb.ZMax-2.0))).BoundBox.YMax    # +Z ear front face
+        for _ey,_zb in ((earY_bot,sb.ZMin),(earY_top,sb.ZMax-TABZ)):                   # bottom band, then top band
+            CLIP=CLIP.fuse(box(TABW,FACE_OUT-_ey,TABZ,v(OX-TABW/2.0,_ey,_zb)))
         CLIP=CLIP.removeSplitter()
+        # FLUSH TRIM: cut off the finger/gusset proud LEAD so the clips end exactly flush with the coxa top/bottom faces.
+        # (The lead only existed to make the hook fuse cleanly; a robust box-cut removes it without corrupting geometry.)
+        _tb=sb.XLength+40
+        CLIP=CLIP.cut(box(_tb,FACE_OUT+40,20,v(sb.XMin-20,-20,bz1)))                   # remove everything above the top face
+        CLIP=CLIP.cut(box(_tb,FACE_OUT+40,20,v(sb.XMin-20,-20,bz0-20)))                # and below the bottom face
+        CLIP=CLIP.removeSplitter()
+        # REPAIR: fusing the 2nd (bottom) hook onto the invalid-BREP hollow cover flips the solid invalid
+        # (geometry is fine -- the finger/leg/nub survive -- but OCC marks it not-valid). If left invalid, the
+        # cosmetic edge fillet below silently CORRUPTS the union and drops the hooks. ShapeFix restores validity
+        # cheaply (NOT the self-intersection remover, which hangs) so the fillet + STL export stay clean.
+        if not CLIP.isValid():
+            try: CLIP.fix(1e-3,1e-3,1e-2)
+            except Exception: print("CLIP fix skipped:\n"+traceback.format_exc())
         # coxa: grown-hook pocket + a uniform RELIEF on the -Y wall (opposite the nub), full leg depth and
         #       NUBR+TOL deep, so the leg can flex the whole nub clear of its recess when snapping together
         for up in (1,-1):
-            COXA=COXA.cut(_hook(up,gx=0.35,gy=0.35,gz=0.35,rounded=False))
+            COXA=COXA.cut(_hook(up,g=0.35,rounded=False))       # rebate + leg slot + nub recess (proud parts cut nothing)
             zface=bz1 if up>0 else bz0
             yw=ATIP-0.35                                         # slot -Y wall (the face opposite the nub)
             za,zb=sorted((zface, zface-up*(LEGD+0.35)))          # cut from surface to the leg-tip depth (same as free tip)
@@ -254,25 +334,21 @@ try:
                 ys=[vt.Point.y for vt in e.Vertexes]
                 if min(ys)<FRONT+0.1: continue                        # only the cover body, in front of the seat
                 c=e.CenterOfMass
-                if abs(c.z-OZ)<HOLE*0.7 and abs(c.x-OX)<HOLE*0.7: continue   # protect the femur ring / bore rim
+                if abs(c.z-OZ)<REC_OD*0.55 and abs(c.x-OX)<REC_OD*0.55: continue   # protect the femur ring / opening rim
                 out.append(e)
             return out
-        try:
-            es=_cle(CLIP)
-            if es:
-                try: CLIP=CLIP.makeFillet(ROUND_CLIP,es).removeSplitter()
-                except Exception:
-                    for p in [e.CenterOfMass for e in es]:
-                        cand=[e for e in CLIP.Edges if e.CenterOfMass.distanceToPoint(p)<1e-4]
-                        if cand:
-                            try: CLIP=CLIP.makeFillet(ROUND_CLIP,[cand[0]]).removeSplitter()
-                            except Exception: pass
-        except Exception: print("CLIP round skipped:\n"+traceback.format_exc())
-        print("CLIP: flat cover Y[%.1f,%.1f] | SNAP: long finger + 90deg leg %.1fmm into coxa + rounded nub r%.1f on cover-facing face | servo tab back to Y%.1f"%(
-            FRONT,FACE_OUT,LEGD,NUBR,earY))
+        # Cosmetic: round the cover-body edges. Like the hook fillet, makeFillet can "succeed" without raising
+        # yet return an INVALID solid (a corrupt spike that drops both snap hooks). CLIP is a clean valid solid
+        # with both hooks present at this point, so VALIDATE the fillet and revert to the unfilleted solid if it
+        # goes bad -- a sharp-edged cover body is fine and, above all, valid + printable.
+        # Route through the same guarded helper as the coxa: batch fillet, else one edge at a time, each result
+        # validated (frac=0.8 -- a corrupt fillet spike that drops a snap hook loses >20% volume and is reverted).
+        CLIP=edge_op(CLIP, _cle(CLIP), 'makeFillet', ROUND_CLIP, 0.8)
+        print("CLIP: flat cover Y[%.1f,%.1f] | FLUSH SNAP: %.1fmm beam x%.0f RECESSED flush (block grew %.1f/side, wall2servo %.2f) + flush lateral gusset +%.1f/side, leg %.1fmm deep/%.1f thick, nub r%.1f | tabs->Y%.1f"%(
+            FRONT,FACE_OUT,BEAM,AW,CLIPGROW,WALL+CLIPGROW-BEAM,LATG,LEGD,LEGY,NUBR,earY))
         if RING is not None:
-            print("RING insert: OD%.0f bore%.0f seat%.1f | ROUNDED bullnose contact ridge rc%.1f x R%.1f | solids=%d"%(
-                REC_OD,HOLE,REC_DEP,rc,RCS,len(RING.Solids)))
+            print("RING insert: SLIP-FIT frame OD%.0f seat%.1f + flat rim OD%.0f proud%.1f, rounded-rect hole %.0fx%.0f | solids=%d"%(
+                REC_OD,REC_DEP,REC_OD-2.0,INS_PROUD,OPEN_X+1.0,OPEN_Z+1.0,len(RING.Solids)))
     except Exception:
         CLIP=None; print("CLIP FAIL:\n"+traceback.format_exc())
     def bbs(b): return "X[%.1f,%.1f] Y[%.1f,%.1f] Z[%.1f,%.1f]"%(b.XMin,b.XMax,b.YMin,b.YMax,b.ZMin,b.ZMax)

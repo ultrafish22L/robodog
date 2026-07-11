@@ -6,9 +6,10 @@ temp/
 __pycache__/
 *.pyc
 
-# FreeCAD backups
+# FreeCAD backups + native saves (canonical geometry is the .py scripts, run via exec())
 *.FCStd1
 *.FCBak
+*.FCStd
 
 # Regenerable FreeCAD render outputs (re-create by running dog.py)
 ref/iter/
@@ -16,3 +17,15 @@ ref/iter/
 # Large external reference meshes (Spot scans + AI-generated ghosts; kept locally, too big to version)
 ref/*.glb
 ref/*.stl
+
+# Servo reference scans + AI-generated assets + downloaded reference models (huge binaries, kept locally)
+aigenerated/
+servo1/
+servo2/
+Micro-Servo+(SG90)+Attachment+Gear/
+servo-horn-round-fs90-with-gear-model_files/
+Servo+Arm+Round+21T_stls/
+
+# Slicer intermediates + scratch logs (STL is the tracked deliverable)
+stl/*.3mf
+otoy_scorecard.jsonl

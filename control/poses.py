@@ -11,7 +11,7 @@ import kinematics as K
 HERE = os.path.dirname(os.path.abspath(__file__))
 URDF = os.path.join(HERE, "robodog.urdf")
 
-def targets_to_pose(targets, legs, seed=(0, 30, -70)):
+def targets_to_pose(targets, legs, seed=(0, 30, 45)):   # v9 positive-knee seed (flex folds +)
     """{leg: foot_xyz(mm)} -> {leg:(s,p,f)}, and the worst IK residual (mm)."""
     pose, worst = {}, 0.0
     for n, lg in legs.items():

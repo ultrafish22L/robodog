@@ -23,29 +23,25 @@ def rrect(x,cz,hy,hz,r):
     return Part.Wire(E)
 def loft(sts): return Part.makeLoft([rrect(*s) for s in sts], True, False)
 
-# ---- scaled section table. Old body was sized to a ~245mm frame; new frame is 206 (x[-103,103]).
-#      SX scales X only; hy=39 (width 78 over the 71.4 frame -> ~3mm skirt clearance/side); cz/hz kept
-#      so the dome roof sits ~8mm above the frame top (z20.7) like before. ----
-WALL=2.2; SX=0.84; BELLYZ=4.0
-MAIN0=[(-150,15.2,39,9.5),(-138,15.4,39,10),(-122,15.5,39,11),(-90,16,39,12.5),(-45,16.3,39,13),
-       (0,16.3,39,13),(45,16.5,39,13),(80,16.8,39,12.5),(100,18,39,12),(122,19.3,39,12.5),(140,19.6,39,12),(156,19.6,39,11.5)]
-MAIN=[(x*SX,cz,hy+0.5,hz) for (x,cz,hy,hz) in MAIN0]   # hy 39->39.5: skirt inner ~37.3 clears the frame snap-bead tip (Y36.7)
+# ---- SINGLE-FEATURE body (issue 1, user 2026-07-29): the old build = dome + straight skirt + keel-chamfer, which
+#      read as TWO stacked rounded lobes on head/rump (a horizontal groove where the dome met the skirt/chamfer).
+#      Now the WHOLE body is ONE tall loft: each rounded-rect ring spans crown->keel in a single section, so every
+#      cross-section is one smooth rounded form (dome top -> vertical side -> rounded keel). The trunk's lower half
+#      is removed by the belly-open cut below, so the tall rings survive only as the wrap-down head/rump end caps --
+#      each now a single continuous feature. No separate skirt loft, no keel chamfer -> no groove.
+#      CROWN[x_old,z_top] = the old roof-top height (old MAIN0 cz+hz); ring: cz=(top+KEEL)/2, hz=(top-KEEL)/2.
+WALL=2.2; SX=0.84; BELLYZ=4.0; HY=39.5; KEEL=-26.0; RAD=11.0
+CROWN=[(-150,24.7),(-138,25.4),(-122,26.5),(-90,28.5),(-45,29.3),(0,29.3),
+       (45,29.5),(80,29.3),(100,30.0),(122,31.8),(140,31.6),(156,31.1)]
+MAIN=[(xo*SX,(ct+KEEL)/2.0,HY,(ct-KEEL)/2.0) for (xo,ct) in CROWN]   # (x, cz, hy, hz); KEEL wrap-down clears frame floor (zbot=-22)
 FX=156*SX; RX=-147*SX                                   # slant-cut pivots (head front / rump rear)
-SKIRTZ=-25.0                                            # shell belly wraps UNDER the frame keel (frame floor bottom zbot=-22);
-                                                        # -25 keeps the 2.2mm floor's inner surface (~-22.8) below the frame floor -> clears it. Head+rump only (trunk reopened)
-def sec(ztop,zbot,hy):
-    cz=(ztop+zbot)/2.0; hz=(ztop-zbot)/2.0
-    return (cz,hy,hz,min(10.0,max(0.6,hz-0.6),hy-0.6))
 
 def build(IN):
-    b=loft([(x,cz,hy-IN,hz-IN,max(0.6,min(10.0,hz-IN-0.6))) for (x,cz,hy,hz) in MAIN]).common(box(400,80-2*IN,200,v(-200,-40+IN,-40)))
-    # SKIRT: extend the body straight DOWN (z7 -> SKIRTZ) so head+rump can drape over the frame sides+bottom (user
-    # 2026-07-29). RULED loft, same x-stations as MAIN, overlaps the MAIN bottom (~z3-7) to fuse into one body.
-    sk=Part.makeLoft([rrect(x,*sec(7.0,SKIRTZ+IN,hy-IN)) for (x,cz,hy,hz) in MAIN],True,True)
-    b=b.fuse(sk).removeSplitter()
+    # single tall loft, inset by IN (0=outer, WALL=inner cavity). Y-clip to +/-(40-IN); slant-cut the head/rump ends.
+    b=loft([(x,cz,hy-IN,hz-IN,max(0.6,min(RAD,hz-IN-0.6))) for (x,cz,hy,hz) in MAIN]).common(box(400,80-2*IN,340,v(-200,-40+IN,-60)))
     dF=IN/math.cos(math.radians(22)); dR=IN/math.cos(math.radians(8))
-    b=b.cut(rot(box(90,90,150,v(FX-dF,-45,-55)),22,v(FX-dF,0,19.6),Y))                  # head front 22deg slant
-    b=b.cut(rot(box(90,90,150,v(RX-90+dR,-45,-55)),-8,v(RX+dR,0,15.2),Y))               # rump rear 8deg slant
+    b=b.cut(rot(box(90,90,190,v(FX-dF,-45,-62)),22,v(FX-dF,0,19.6),Y))                  # head front 22deg slant
+    b=b.cut(rot(box(90,90,190,v(RX-90+dR,-45,-62)),-8,v(RX+dR,0,15.2),Y))               # rump rear 8deg slant
     return b
 
 try:
@@ -62,18 +58,11 @@ try:
             if b2.isValid() and len(b2.Solids)==1: body=b2; fil="%d@%.1f"%(len(edg),rad); break
         except Exception: pass
     body=body.removeSplitter()
-    # HOLLOW to a thin wall, then OPEN the belly (remove everything below the skirt line) -> a canopy/dome.
+    # HOLLOW to a thin wall (no keel chamfer any more -- the single tall loft's own rounded keel forms the wrap-down;
+    # the old chamfer was what split each cap into two lobes). Then OPEN the belly.
     shell=body.cut(build(WALL)).removeSplitter()
-    # KEEL CHAMFER: taper the shell's lower-outer edges to match the frame belly chamfer, offset OUT+down for ~2mm
-    # clearance, so the head/rump belly hugs the frame keel. Frame chamfer (Y35.7,z-11)->(Y23.7,z-22); shell
-    # (Y39.5,z-9)->(Y24.5,z-24). Applies to head/rump; the trunk skirt below is reopened next so it's unaffected.
-    # chamfer line = the frame belly chamfer shifted ~3.5mm OUTward so even the 2.2mm-wall inner surface clears the
-    # frame chamfer by ~1mm. Top (Y39.5,z-12.25) meets the straight skirt wall; slope dY/dz=1.09 (frame's); keel to (20.2,-30).
-    chp=[v(-210,y,z) for (y,z) in [(39.5,-12.25),(50.0,-12.25),(50.0,-30.0),(20.2,-30.0)]]
-    ch=Part.Face(Part.makePolygon(chp+[chp[0]])).extrude(v(420,0,0))
-    shell=shell.cut(ch).cut(tf(ch,1,-1)).removeSplitter()
     # OPEN THE TRUNK BELLY ONLY (x in [-98.4,98.4], between + incl the hips): the head + rump keep the wrapped-down
-    # skirt+keel; the trunk stays an open-belly canopy for the legs + belly electronics.
+    # keel; the trunk stays an open-belly canopy for the legs + belly electronics.
     shell=shell.cut(box(196.8,140,BELLYZ+80,v(-98.4,-70,BELLYZ-80)))
     shell=shell.removeSplitter()
     if len(shell.Solids)>1: shell=max(shell.Solids,key=lambda q:q.Volume)
@@ -82,10 +71,16 @@ try:
     #      capped at the frame top (z20.7) so it does NOT eat the roof crown above it (that was severing the shell). ----
     shell=shell.cut(box(207.2,72.6,21.2,v(-103.6,-36.3,-0.5)))
     shell=shell.removeSplitter()
-    # clear the 4 splay-pin COLLARS (O16, ~3mm proud of the frame outer at cbx1~100) + dowel stubs, which now sit
-    # inside the head/rump drape and poke past the shell wall.
-    _col=Part.makeCylinder(COLR+1.6, COLL+7.0, v(cbx1-3.0, SPYp, SPZp), X)
+    # ---- COLLAR CLEARANCE + END-GRIP (user 2026-07-29 "snaps on the bottom edges where head/rump meet the frame"):
+    #      the caps are noses BEYOND the frame -- the collars (O16, x100-103) are the only frame-end feature reaching
+    #      into each cap. Clear the collar (O16.8 pocket) but leave a GRIP RING (O15.6 inner, 2mm, at the collar tip)
+    #      so each cap nose lightly snaps onto its 2 collars = the caps grip the frame end. Ring clears the O13 pin
+    #      head (passes over it to reach the collar). ----
+    _col=Part.makeCylinder(COLR+0.4, COLL+7.0, v(cbx1-3.0, SPYp, SPZp), X)      # O16.8 clearance pocket
     for sxc,syc in CORNERS: shell=shell.cut(tf(_col,sxc,syc))
+    _grip=Part.makeCylinder(COLR+3.0, 2.0, v(cbx1+COLL-2.5, SPYp, SPZp), X).cut(
+          Part.makeCylinder(COLR-0.2, 2.6, v(cbx1+COLL-2.8, SPYp, SPZp), X))    # grip ring O15.6, 2mm, at the collar tip
+    for sxc,syc in CORNERS: shell=shell.fuse(tf(_grip,sxc,syc))
     shell=shell.removeSplitter()
 
     # ---- HIP OPENINGS: the leg passes through the shell ONLY in the band z>=BELLYZ (the swinging femur/tibia hang in
@@ -111,7 +106,7 @@ try:
     eL=envof(box(500,80,FTOP-(BELLYZ-1),v(-250,-40,BELLYZ-1)))   # |Y|<=40, BELLYZ-1..FTOP
     eH=envof(box(500,80,100,v(-250,-40,FTOP)))                    # |Y|<=40, > FTOP
     def obox(e,z0,z1): return box(e.XMax-e.XMin+2*CLR, e.YMax-e.YMin+2*CLR, z1-z0, v(e.XMin-CLR, e.YMin-CLR, z0))
-    hips=[obox(eL,BELLYZ-2.0,FTOP)]
+    hips=[obox(eL,KEEL-1.0,FTOP)]   # open the low hip all the way down to the keel: the single tall loft wraps the
     if eH is not None: hips.append(obox(eH,FTOP-0.5,eH.ZMax+CLR))
     for sxc,syc in CORNERS:
         for hb in hips: shell=shell.cut(tf(hb,sxc,syc))
@@ -120,33 +115,79 @@ try:
         eL.YMin,eL.YMax,(eH.YMin if eH else 0),(eH.YMax if eH else 0),(eH.ZMax if eH else FTOP),
         (eH.YMin-CLR if eH else 40),len(shell.Solids)))
 
-    # ---- SNAP FINGERS: 6 leaf-spring fingers (3 per rail at x=0,+-45) clip the shell onto the frame rim-cap bead
-    #      (framemin, x[-75,75]). Each = a U-slot isolating a horizontal leaf (anchored at its -X end) + an inward NUB
-    #      whose flat top hooks under the bead undershelf (z16.2-16.55) and whose sloped bottom cams over the bead on
-    #      insertion. Print belly-up -> the leaf bends along X in the layer plane (strong). ----
-    for xc in (-45.0,0.0,45.0):
-        for sl in [box(14,6,1.4,v(xc-6,35.8,17.8)),        # top gap
-                   box(14,6,1.4,v(xc-6,35.8,11.8)),        # bottom gap
-                   box(1.4,6,6.0,v(xc+6,35.8,11.8))]:      # free-end gap (leaf anchored at its -X end)
-            shell=shell.cut(sl).cut(tf(sl,1,-1))
-        prof=[(37.4,16.3),(36.0,16.3),(36.0,15.3),(37.4,13.9)]     # Y-Z: flat catch top (z16.3, to Y36.0) + sloped lead-in bottom
-        nub=Part.Face(Part.makePolygon([v(xc+1,y,z) for (y,z) in prof]+[v(xc+1,prof[0][0],prof[0][1])])).extrude(v(4.0,0,0))
-        shell=shell.fuse(nub).fuse(tf(nub,1,-1))
+    # ---- CAP LEG RELIEF: the single tall loft wraps the caps DOWN into where the front/rear leg swings below the
+    #      trunk belly (the hip openings only clear the near-hip z>=BELLYZ footprint; the old keel chamfer used to
+    #      pull the belly inboard so the swinging leg passed OUTSIDE it). Cut the leg's swept envelope where it enters
+    #      the cap lower region, BOUNDED to the cap X-band (x>=70) so the far-swinging toe can't eat the shell, +0.8
+    #      gap, mirrored to all 4 corners. Keeps the OUTER cap smooth (this is an inner/lower wheel-well relief). ----
+    _capbox=box(80.0,140.0,(BELLYZ+2)-(KEEL-2), v(70.0,-70.0,KEEL-2))     # +X cap lower region x[70,150], z[KEEL-2,BELLYZ+2]
+    _legenv=None
+    for sp in (-15,0,15):
+        for ph in (-30,0,30):
+            for th in (0,25,45):
+                _seg=leg_pose(sp,ph,th).common(_capbox)
+                if _seg.Volume>1: _legenv=_seg if _legenv is None else _legenv.fuse(_seg)
+    if _legenv is not None:
+        _legenv=_legenv.removeSplitter()
+        for sxc,syc in CORNERS: shell=shell.cut(tf(_legenv,sxc,syc))
+        shell=shell.removeSplitter()
+        if len(shell.Solids)>1: shell=max(shell.Solids,key=lambda q:q.Volume)
+        print("CAP LEG RELIEF cut (env vol %.0f)"%_legenv.Volume)
+
+    # ---- SPINE STIFFENER RIB (issue 2, user 2026-07-29): the two-band hip cuts leave only a thin crown-spine strip
+    #      (|Y|<~6) tying each cap to the trunk -- flimsy. Add a continuous rib on the roof UNDERSIDE along the spine
+    #      (Y~0), rump->head, turning each flat strip into a T-beam (flange=strip, web=rib). rib = a Y-narrow column
+    #      INTERSECTED with the outer body (so its top rides the roof outer, unchanged) then fused into the hollow
+    #      shell -> a solid spine beam from the roof inner down to RIBZ. At Y~0 the frame centre bay is open (max
+    #      z~4), so RIBZ can hang well below the frame top with clearance; kept modest for weight. ----
+    RIBHY=2.5; RIBZ=21.5     # RIBZ just above the frame top (20.7): the corner blocks are near-full-width at their
+    rib=box(FX-RX+10.0, 2*RIBHY, 60.0, v(RX-5.0, -RIBHY, RIBZ)).common(body)   # tops (coxa swings inboard), so a
+    shell=shell.fuse(rib).removeSplitter()                                     # deeper rib would hit them; 21.5 clears
+
+    # ---- issue-3 RECEIVERS (user 2026-07-29): the frame carries lateral detent NUBS + vertical alignment POSTS
+    #      (built in framemin, positions in the shared globals NUB/NUB_X/SNAP_Y/POST/POST_Z0). Here we cut the body-
+    #      side receivers: a wall POCKET over each nub (the seated detent sits relaxed; the wall above/below springs
+    #      ~0.5mm for push-on / pull-off retention) and a CUP boss with a clearance blind hole over each peg (locates
+    #      X-Y-theta as the canopy drops on). Nubs/pockets are on the trunk sides only (the hip openings gap the wall
+    #      beyond x+/-60 and the caps sit beyond the frame) -- the stiffened spine rib carries that hold to the caps. ----
+    _po=SNAP_Y+NUB['proud']+0.5                              # pocket outboard face, just past the nub tip
+    _pk_out=_po-(SNAP_Y-0.3)
+    for xc in NUB_X:
+        pk=box(NUB['w']+2.0, _pk_out, 2*NUB['hh']+1.0, v(xc-(NUB['w']+2.0)/2.0, SNAP_Y-0.3, NUB['zc']-NUB['hh']-0.5))
+        shell=shell.cut(pk).cut(tf(pk,1,-1))
+    for (px,py,pd,ph) in POST:
+        for sy in (1,-1):
+            qy=py*sy
+            boss=Part.makeCylinder((pd+3.0)/2.0, 70.0, v(px,qy,POST_Z0+0.3), Z).common(body)   # +0.3 clears frame top; clipped to roof
+            shell=shell.fuse(boss)
+            shell=shell.cut(Part.makeCylinder((pd+0.5)/2.0, ph+1.2, v(px,qy,POST_Z0-0.4), Z))   # clearance blind bore for the peg
     shell=shell.removeSplitter()
+    # confirm the cup bores clear the frame pegs + the roof (peg tip must enter the bore, bore must stay blind):
+    def _in(s,x,y,z):
+        try: return s.isInside(App.Vector(x,y,z),0.05,True)
+        except Exception: return False
+    for (px,py,pd,ph) in POST:
+        print("PROBE post x%+.0f y%+.0f: roofInner z"%(px,py)+"".join(
+            " %d:%s"%(zz,"S" if _in(body,px,py,zz) else "-") for zz in (22,24,26,28,30)))
 
     # ---- verify shell clears frame + legs over the working range ----
     _frc=shell.common(FR); frov=_frc.Volume
     if frov>1:
         for _p in sorted(_frc.Solids,key=lambda q:-q.Volume)[:8]:
             _b=_p.BoundBox; print("  FR-OV X[%.0f,%.0f] Y[%.1f,%.1f] Z[%.1f,%.1f] v%.0f"%(_b.XMin,_b.XMax,_b.YMin,_b.YMax,_b.ZMin,_b.ZMax,_p.Volume))
-    legworst=0.0
+    legworst=0.0; _lw=None
     for sp in (-15,0,15):
         for ph in (-30,0,30):
             for th in (0,25,45):
-                legworst=max(legworst, shell.common(leg_pose(sp,ph,th)).Volume)
+                _c=shell.common(leg_pose(sp,ph,th))
+                if _c.Volume>legworst: legworst=_c.Volume; _lw=("leg sp%+d ph%+d th%d"%(sp,ph,th),_c)
     for sxc,syc in ((1,1),(1,-1),(-1,1),(-1,-1)):
-        legworst=max(legworst, shell.common(tf(cx,sxc,syc)).Volume)
+        _c=shell.common(tf(cx,sxc,syc))
+        if _c.Volume>legworst: legworst=_c.Volume; _lw=("coxa %d,%d"%(sxc,syc),_c)
     print("CLEAR shell^frame=%.1f  shell^leg(working sweep, worst)=%.1f mm3 (want ~0)"%(frov,legworst))
+    if _lw and _lw[1].Volume>1:
+        for _p in sorted(_lw[1].Solids,key=lambda q:-q.Volume)[:4]:
+            _b=_p.BoundBox; print("  LEG-OV [%s] X[%.0f,%.0f] Y[%.1f,%.1f] Z[%.1f,%.1f] v%.0f"%(_lw[0],_b.XMin,_b.XMax,_b.YMin,_b.YMax,_b.ZMin,_b.ZMax,_p.Volume))
 
     bb=shell.BoundBox; ov=frov
     print("SHELL bbox X[%.1f,%.1f]=%.1f Y[%.1f,%.1f]=%.1f Z[%.1f,%.1f]=%.1f  fillet=%s wall=%.1f vol=%.0f"%(

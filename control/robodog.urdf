@@ -3,329 +3,329 @@
   <link name="base_link">
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_frame.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_frame_m"><color rgba="0.35 0.37 0.40 1"/></material>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_frame.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_v9_frame_m"><color rgba="0.35 0.37 0.40 1"/></material>
     </visual>
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_frame.stl" scale="0.001 0.001 0.001"/></geometry>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_frame.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000029 -0.000019 -0.010377"/>
-      <mass value="0.05742"/>
-      <inertia ixx="0.0000474" ixy="-0.0000001" ixz="-0.0000000" iyy="0.0003849" iyz="0.0000000" izz="0.0004068"/>
+      <origin xyz="0.000044 -0.000000 -0.002033"/>
+      <mass value="3.563629e-02"/>
+      <inertia ixx="2.199863e-05" ixy="8.322859e-11" ixz="2.599133e-08" iyy="1.552245e-04" iyz="-6.777572e-11" izz="1.642995e-04"/>
     </inertial>
   </link>
   <link name="fl_coxa">
     <visual>
-      <origin xyz="0.000000 -0.027200 -0.012000" rpy="0.000000 -0.000000 0.000000"/>
+      <origin xyz="-0.023350 -0.020000 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
       <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa.stl" scale="0.001 0.001 0.001"/></geometry>
       <material name="sm3sg90_coxa_m"><color rgba="0.55 0.57 0.60 1"/></material>
     </visual>
     <collision>
-      <origin xyz="0.000000 -0.027200 -0.012000" rpy="0.000000 -0.000000 0.000000"/>
+      <origin xyz="-0.023350 -0.020000 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
       <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
+    <visual>
+      <origin xyz="-0.023350 -0.020000 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_cover.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_coxa_cover_m"><color rgba="0.66 0.54 0.38 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="-0.023350 -0.020000 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_cover.stl" scale="0.001 0.001 0.001"/></geometry>
+    </collision>
     <inertial>
-      <origin xyz="0.100624 -0.001661 -0.005650"/>
-      <mass value="0.00315"/>
-      <inertia ixx="0.0000004" ixy="-0.0000000" ixz="0.0000000" iyy="0.0000003" iyz="0.0000000" izz="0.0000003"/>
+      <origin xyz="0.082858 0.000053 -0.006310"/>
+      <mass value="1.055894e-02"/>
+      <inertia ixx="2.783162e-06" ixy="-4.751623e-10" ixz="2.172197e-08" iyy="2.824639e-06" iyz="2.624381e-08" izz="1.810457e-06"/>
     </inertial>
   </link>
   <link name="fl_femur">
     <visual>
-      <origin xyz="-0.100000 0.000000 -0.010000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_femur.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_femur_m"><color rgba="0.90 0.78 0.20 1"/></material>
+      <origin xyz="-0.106000 0.009300 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_femur.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_v9_femur_m"><color rgba="0.90 0.78 0.20 1"/></material>
     </visual>
     <collision>
-      <origin xyz="-0.100000 0.000000 -0.010000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_femur.stl" scale="0.001 0.001 0.001"/></geometry>
+      <origin xyz="-0.106000 0.009300 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_femur.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000021 0.052839 -0.037658"/>
-      <mass value="0.01653"/>
-      <inertia ixx="0.0000179" ixy="0.0000000" ixz="0.0000000" iyy="0.0000163" iyz="0.0000005" izz="0.0000027"/>
+      <origin xyz="-0.000000 0.055190 -0.040824"/>
+      <mass value="6.769587e-03"/>
+      <inertia ixx="5.744508e-06" ixy="8.563072e-23" ixz="1.024540e-22" iyy="5.378961e-06" iyz="1.127704e-06" izz="9.874647e-07"/>
     </inertial>
   </link>
   <link name="fl_tibia">
     <visual>
-      <origin xyz="-0.100000 0.000000 0.075000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_tibia.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_tibia_m"><color rgba="0.28 0.30 0.34 1"/></material>
+      <origin xyz="-0.106000 0.009300 0.059602" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_tibia.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_v9_tibia_m"><color rgba="0.28 0.30 0.34 1"/></material>
     </visual>
     <collision>
-      <origin xyz="-0.100000 0.000000 0.075000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_tibia.stl" scale="0.001 0.001 0.001"/></geometry>
-    </collision>
-    <visual>
-      <origin xyz="-0.100000 0.000000 0.075000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_boot_TPU.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_boot_TPU_m"><color rgba="0.12 0.12 0.14 1"/></material>
-    </visual>
-    <collision>
-      <origin xyz="-0.100000 0.000000 0.075000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_boot_TPU.stl" scale="0.001 0.001 0.001"/></geometry>
+      <origin xyz="-0.106000 0.009300 0.059602" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_tibia.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
     <inertial>
-      <origin xyz="-0.000519 0.054639 -0.051452"/>
-      <mass value="0.01454"/>
-      <inertia ixx="0.0000136" ixy="0.0000000" ixz="-0.0000009" iyy="0.0000130" iyz="0.0000001" izz="0.0000015"/>
+      <origin xyz="-0.000000 0.041452 -0.032849"/>
+      <mass value="2.671392e-03"/>
+      <inertia ixx="2.182855e-06" ixy="4.262156e-24" ixz="2.899483e-23" iyy="2.239195e-06" iyz="3.946453e-09" izz="7.923989e-08"/>
     </inertial>
   </link>
   <joint name="fl_splay" type="revolute">
     <parent link="base_link"/>
     <child link="fl_coxa"/>
-    <origin xyz="0.000000 0.027200 0.012000"/>
+    <origin xyz="0.000000 0.027200 0.010398"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-0.9599" upper="0.9599" effort="2.0" velocity="8.0"/>
+    <limit lower="-0.7854" upper="0.7854" effort="2.0" velocity="8.0"/>
   </joint>
   <joint name="fl_pitch" type="revolute">
     <parent link="fl_coxa"/>
     <child link="fl_femur"/>
-    <origin xyz="0.100000 -0.027200 -0.002000"/>
+    <origin xyz="0.082650 -0.027200 0.000000"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-1.7453" upper="1.7453" effort="2.0" velocity="8.0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="2.0" velocity="8.0"/>
   </joint>
   <joint name="fl_knee" type="revolute">
     <parent link="fl_femur"/>
     <child link="fl_tibia"/>
-    <origin xyz="0.000000 0.000000 -0.085000"/>
+    <origin xyz="0.000000 0.000000 -0.070000"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-2.1817" upper="2.1817" effort="2.0" velocity="8.0"/>
+    <limit lower="-1.2217" upper="1.2217" effort="2.0" velocity="8.0"/>
   </joint>
   <link name="fr_coxa">
     <visual>
-      <origin xyz="0.000000 -0.026000 -0.012000" rpy="0.000000 -0.000000 0.000000"/>
+      <origin xyz="-0.023350 -0.014898 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
       <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_mir.stl" scale="0.001 0.001 0.001"/></geometry>
       <material name="sm3sg90_coxa_mir_m"><color rgba="0.55 0.57 0.60 1"/></material>
     </visual>
     <collision>
-      <origin xyz="0.000000 -0.026000 -0.012000" rpy="0.000000 -0.000000 0.000000"/>
+      <origin xyz="-0.023350 -0.014898 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
       <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_mir.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
+    <visual>
+      <origin xyz="-0.023350 -0.024894 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_cover_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_coxa_cover_mir_m"><color rgba="0.66 0.54 0.38 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="-0.023350 -0.024894 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_cover_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+    </collision>
     <inertial>
-      <origin xyz="0.100624 0.001661 -0.005650"/>
-      <mass value="0.00315"/>
-      <inertia ixx="0.0000004" ixy="0.0000000" ixz="0.0000000" iyy="0.0000003" iyz="-0.0000000" izz="0.0000003"/>
+      <origin xyz="0.082858 -0.000053 -0.006310"/>
+      <mass value="1.055894e-02"/>
+      <inertia ixx="2.783162e-06" ixy="4.751628e-10" ixz="2.172197e-08" iyy="2.824639e-06" iyz="-2.624381e-08" izz="1.810457e-06"/>
     </inertial>
   </link>
   <link name="fr_femur">
     <visual>
-      <origin xyz="-0.100000 -0.114960 -0.010000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_femur_mir.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_femur_mir_m"><color rgba="0.90 0.78 0.20 1"/></material>
+      <origin xyz="-0.106000 -0.105350 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_femur_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_v9_femur_mir_m"><color rgba="0.90 0.78 0.20 1"/></material>
     </visual>
     <collision>
-      <origin xyz="-0.100000 -0.114960 -0.010000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_femur_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+      <origin xyz="-0.106000 -0.105350 -0.010398" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_femur_mir.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000021 -0.052835 -0.037659"/>
-      <mass value="0.01653"/>
-      <inertia ixx="0.0000179" ixy="-0.0000000" ixz="-0.0000000" iyy="0.0000163" iyz="-0.0000005" izz="0.0000027"/>
+      <origin xyz="0.000000 -0.055189 -0.040822"/>
+      <mass value="6.769908e-03"/>
+      <inertia ixx="5.745075e-06" ixy="-3.201437e-12" ixz="-1.442106e-11" iyy="5.379499e-06" iyz="-1.127831e-06" izz="9.874932e-07"/>
     </inertial>
   </link>
   <link name="fr_tibia">
     <visual>
-      <origin xyz="-0.100000 -0.110410 0.075000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_tibia_mir.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_tibia_mir_m"><color rgba="0.28 0.30 0.34 1"/></material>
+      <origin xyz="-0.106000 -0.105350 0.059602" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_tibia_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_v9_tibia_mir_m"><color rgba="0.28 0.30 0.34 1"/></material>
     </visual>
     <collision>
-      <origin xyz="-0.100000 -0.110410 0.075000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_tibia_mir.stl" scale="0.001 0.001 0.001"/></geometry>
-    </collision>
-    <visual>
-      <origin xyz="-0.100000 -0.110360 0.075000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_boot_TPU.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_boot_TPU_m"><color rgba="0.12 0.12 0.14 1"/></material>
-    </visual>
-    <collision>
-      <origin xyz="-0.100000 -0.110360 0.075000" rpy="0.000000 -0.000000 0.000000"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_boot_TPU.stl" scale="0.001 0.001 0.001"/></geometry>
+      <origin xyz="-0.106000 -0.105350 0.059602" rpy="0.000000 -0.000000 0.000000"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_tibia_mir.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
     <inertial>
-      <origin xyz="-0.000519 -0.054639 -0.051452"/>
-      <mass value="0.01454"/>
-      <inertia ixx="0.0000136" ixy="-0.0000000" ixz="-0.0000009" iyy="0.0000130" iyz="-0.0000001" izz="0.0000015"/>
+      <origin xyz="0.000000 -0.041452 -0.032837"/>
+      <mass value="2.672339e-03"/>
+      <inertia ixx="2.183865e-06" ixy="-5.078127e-14" ixz="-1.837132e-11" iyy="2.240225e-06" iyz="-3.932300e-09" izz="7.926404e-08"/>
     </inertial>
   </link>
   <joint name="fr_splay" type="revolute">
     <parent link="base_link"/>
     <child link="fr_coxa"/>
-    <origin xyz="0.000000 -0.027200 0.012000"/>
+    <origin xyz="0.000000 -0.027200 0.010398"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-0.9599" upper="0.9599" effort="2.0" velocity="8.0"/>
+    <limit lower="-0.7854" upper="0.7854" effort="2.0" velocity="8.0"/>
   </joint>
   <joint name="fr_pitch" type="revolute">
     <parent link="fr_coxa"/>
     <child link="fr_femur"/>
-    <origin xyz="0.100000 0.027200 -0.002000"/>
+    <origin xyz="0.082650 0.027200 0.000000"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-1.7453" upper="1.7453" effort="2.0" velocity="8.0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="2.0" velocity="8.0"/>
   </joint>
   <joint name="fr_knee" type="revolute">
     <parent link="fr_femur"/>
     <child link="fr_tibia"/>
-    <origin xyz="0.000000 0.000000 -0.085000"/>
+    <origin xyz="0.000000 0.000000 -0.070000"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-2.1817" upper="2.1817" effort="2.0" velocity="8.0"/>
+    <limit lower="-1.2217" upper="1.2217" effort="2.0" velocity="8.0"/>
   </joint>
   <link name="rl_coxa">
     <visual>
-      <origin xyz="0.000000 0.026000 -0.012000" rpy="0.000000 -0.000000 3.141593"/>
+      <origin xyz="0.023350 0.014898 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
       <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_mir.stl" scale="0.001 0.001 0.001"/></geometry>
       <material name="sm3sg90_coxa_mir_m"><color rgba="0.55 0.57 0.60 1"/></material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.026000 -0.012000" rpy="0.000000 -0.000000 3.141593"/>
+      <origin xyz="0.023350 0.014898 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
       <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_mir.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
+    <visual>
+      <origin xyz="0.023350 0.024894 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_cover_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_coxa_cover_mir_m"><color rgba="0.66 0.54 0.38 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0.023350 0.024894 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_cover_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+    </collision>
     <inertial>
-      <origin xyz="-0.100624 -0.001661 -0.005650"/>
-      <mass value="0.00315"/>
-      <inertia ixx="0.0000004" ixy="0.0000000" ixz="-0.0000000" iyy="0.0000003" iyz="0.0000000" izz="0.0000003"/>
+      <origin xyz="-0.082858 0.000053 -0.006310"/>
+      <mass value="1.055894e-02"/>
+      <inertia ixx="2.783162e-06" ixy="4.751628e-10" ixz="-2.172197e-08" iyy="2.824639e-06" iyz="2.624381e-08" izz="1.810457e-06"/>
     </inertial>
   </link>
   <link name="rl_femur">
     <visual>
-      <origin xyz="0.100000 0.114960 -0.010000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_femur_mir.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_femur_mir_m"><color rgba="0.90 0.78 0.20 1"/></material>
+      <origin xyz="0.106000 0.105350 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_femur_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_v9_femur_mir_m"><color rgba="0.90 0.78 0.20 1"/></material>
     </visual>
     <collision>
-      <origin xyz="0.100000 0.114960 -0.010000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_femur_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+      <origin xyz="0.106000 0.105350 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_femur_mir.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
     <inertial>
-      <origin xyz="-0.000021 0.052835 -0.037659"/>
-      <mass value="0.01653"/>
-      <inertia ixx="0.0000179" ixy="-0.0000000" ixz="0.0000000" iyy="0.0000163" iyz="0.0000005" izz="0.0000027"/>
+      <origin xyz="-0.000000 0.055189 -0.040822"/>
+      <mass value="6.769908e-03"/>
+      <inertia ixx="5.745075e-06" ixy="-3.201437e-12" ixz="1.442106e-11" iyy="5.379499e-06" iyz="1.127831e-06" izz="9.874932e-07"/>
     </inertial>
   </link>
   <link name="rl_tibia">
     <visual>
-      <origin xyz="0.100000 0.110410 0.075000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_tibia_rear_mir.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_tibia_rear_mir_m"><color rgba="0.28 0.30 0.34 1"/></material>
+      <origin xyz="0.106000 0.105350 0.059602" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_tibia_mir.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_v9_tibia_mir_m"><color rgba="0.28 0.30 0.34 1"/></material>
     </visual>
     <collision>
-      <origin xyz="0.100000 0.110410 0.075000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_tibia_rear_mir.stl" scale="0.001 0.001 0.001"/></geometry>
-    </collision>
-    <visual>
-      <origin xyz="0.100000 0.110360 0.075000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_boot_TPU.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_boot_TPU_m"><color rgba="0.12 0.12 0.14 1"/></material>
-    </visual>
-    <collision>
-      <origin xyz="0.100000 0.110360 0.075000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_boot_TPU.stl" scale="0.001 0.001 0.001"/></geometry>
+      <origin xyz="0.106000 0.105350 0.059602" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_tibia_mir.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000154 0.054639 -0.051452"/>
-      <mass value="0.01454"/>
-      <inertia ixx="0.0000136" ixy="0.0000000" ixz="-0.0000005" iyy="0.0000131" iyz="0.0000001" izz="0.0000015"/>
+      <origin xyz="-0.000000 0.041452 -0.032837"/>
+      <mass value="2.672339e-03"/>
+      <inertia ixx="2.183865e-06" ixy="-5.078127e-14" ixz="1.837132e-11" iyy="2.240225e-06" iyz="3.932300e-09" izz="7.926404e-08"/>
     </inertial>
   </link>
   <joint name="rl_splay" type="revolute">
     <parent link="base_link"/>
     <child link="rl_coxa"/>
-    <origin xyz="0.000000 0.027200 0.012000"/>
+    <origin xyz="0.000000 0.027200 0.010398"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-0.9599" upper="0.9599" effort="2.0" velocity="8.0"/>
+    <limit lower="-0.7854" upper="0.7854" effort="2.0" velocity="8.0"/>
   </joint>
   <joint name="rl_pitch" type="revolute">
     <parent link="rl_coxa"/>
     <child link="rl_femur"/>
-    <origin xyz="-0.100000 -0.027200 -0.002000"/>
+    <origin xyz="-0.082650 -0.027200 0.000000"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-1.7453" upper="1.7453" effort="2.0" velocity="8.0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="2.0" velocity="8.0"/>
   </joint>
   <joint name="rl_knee" type="revolute">
     <parent link="rl_femur"/>
     <child link="rl_tibia"/>
-    <origin xyz="0.000000 0.000000 -0.085000"/>
+    <origin xyz="0.000000 0.000000 -0.070000"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-2.1817" upper="2.1817" effort="2.0" velocity="8.0"/>
+    <limit lower="-1.2217" upper="1.2217" effort="2.0" velocity="8.0"/>
   </joint>
   <link name="rr_coxa">
     <visual>
-      <origin xyz="0.000000 0.027200 -0.012000" rpy="0.000000 -0.000000 3.141593"/>
+      <origin xyz="0.023350 0.020000 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
       <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa.stl" scale="0.001 0.001 0.001"/></geometry>
       <material name="sm3sg90_coxa_m"><color rgba="0.55 0.57 0.60 1"/></material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.027200 -0.012000" rpy="0.000000 -0.000000 3.141593"/>
+      <origin xyz="0.023350 0.020000 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
       <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
+    <visual>
+      <origin xyz="0.023350 0.020000 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_cover.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_coxa_cover_m"><color rgba="0.66 0.54 0.38 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0.023350 0.020000 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_coxa_cover.stl" scale="0.001 0.001 0.001"/></geometry>
+    </collision>
     <inertial>
-      <origin xyz="-0.100624 0.001661 -0.005650"/>
-      <mass value="0.00315"/>
-      <inertia ixx="0.0000004" ixy="-0.0000000" ixz="-0.0000000" iyy="0.0000003" iyz="-0.0000000" izz="0.0000003"/>
+      <origin xyz="-0.082858 -0.000053 -0.006310"/>
+      <mass value="1.055894e-02"/>
+      <inertia ixx="2.783162e-06" ixy="-4.751623e-10" ixz="-2.172197e-08" iyy="2.824639e-06" iyz="-2.624381e-08" izz="1.810457e-06"/>
     </inertial>
   </link>
   <link name="rr_femur">
     <visual>
-      <origin xyz="0.100000 0.000000 -0.010000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_femur.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_femur_m"><color rgba="0.90 0.78 0.20 1"/></material>
+      <origin xyz="0.106000 -0.009300 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_femur.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_v9_femur_m"><color rgba="0.90 0.78 0.20 1"/></material>
     </visual>
     <collision>
-      <origin xyz="0.100000 0.000000 -0.010000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_femur.stl" scale="0.001 0.001 0.001"/></geometry>
+      <origin xyz="0.106000 -0.009300 -0.010398" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_femur.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
     <inertial>
-      <origin xyz="-0.000021 -0.052839 -0.037658"/>
-      <mass value="0.01653"/>
-      <inertia ixx="0.0000179" ixy="0.0000000" ixz="-0.0000000" iyy="0.0000163" iyz="-0.0000005" izz="0.0000027"/>
+      <origin xyz="0.000000 -0.055190 -0.040824"/>
+      <mass value="6.769587e-03"/>
+      <inertia ixx="5.744508e-06" ixy="8.563072e-23" ixz="-1.024540e-22" iyy="5.378961e-06" iyz="-1.127704e-06" izz="9.874647e-07"/>
     </inertial>
   </link>
   <link name="rr_tibia">
     <visual>
-      <origin xyz="0.100000 0.000000 0.075000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_tibia_rear.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_tibia_rear_m"><color rgba="0.28 0.30 0.34 1"/></material>
+      <origin xyz="0.106000 -0.009300 0.059602" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_tibia.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="sm3sg90_v9_tibia_m"><color rgba="0.28 0.30 0.34 1"/></material>
     </visual>
     <collision>
-      <origin xyz="0.100000 0.000000 0.075000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_tibia_rear.stl" scale="0.001 0.001 0.001"/></geometry>
-    </collision>
-    <visual>
-      <origin xyz="0.100000 0.000000 0.075000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_boot_TPU.stl" scale="0.001 0.001 0.001"/></geometry>
-      <material name="sm3sg90_boot_TPU_m"><color rgba="0.12 0.12 0.14 1"/></material>
-    </visual>
-    <collision>
-      <origin xyz="0.100000 0.000000 0.075000" rpy="0.000000 -0.000000 3.141593"/>
-      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_boot_TPU.stl" scale="0.001 0.001 0.001"/></geometry>
+      <origin xyz="0.106000 -0.009300 0.059602" rpy="0.000000 -0.000000 3.141593"/>
+      <geometry><mesh filename="C:/ultrafish/robodog/stl/sm3sg90_v9_tibia.stl" scale="0.001 0.001 0.001"/></geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000154 -0.054639 -0.051452"/>
-      <mass value="0.01454"/>
-      <inertia ixx="0.0000136" ixy="-0.0000000" ixz="-0.0000005" iyy="0.0000131" iyz="-0.0000001" izz="0.0000015"/>
+      <origin xyz="0.000000 -0.041452 -0.032849"/>
+      <mass value="2.671392e-03"/>
+      <inertia ixx="2.182855e-06" ixy="4.262156e-24" ixz="-2.899483e-23" iyy="2.239195e-06" iyz="-3.946453e-09" izz="7.923989e-08"/>
     </inertial>
   </link>
   <joint name="rr_splay" type="revolute">
     <parent link="base_link"/>
     <child link="rr_coxa"/>
-    <origin xyz="0.000000 -0.027200 0.012000"/>
+    <origin xyz="0.000000 -0.027200 0.010398"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-0.9599" upper="0.9599" effort="2.0" velocity="8.0"/>
+    <limit lower="-0.7854" upper="0.7854" effort="2.0" velocity="8.0"/>
   </joint>
   <joint name="rr_pitch" type="revolute">
     <parent link="rr_coxa"/>
     <child link="rr_femur"/>
-    <origin xyz="-0.100000 0.027200 -0.002000"/>
+    <origin xyz="-0.082650 0.027200 0.000000"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-1.7453" upper="1.7453" effort="2.0" velocity="8.0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="2.0" velocity="8.0"/>
   </joint>
   <joint name="rr_knee" type="revolute">
     <parent link="rr_femur"/>
     <child link="rr_tibia"/>
-    <origin xyz="0.000000 0.000000 -0.085000"/>
+    <origin xyz="0.000000 0.000000 -0.070000"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-2.1817" upper="2.1817" effort="2.0" velocity="8.0"/>
+    <limit lower="-1.2217" upper="1.2217" effort="2.0" velocity="8.0"/>
   </joint>
 </robot>

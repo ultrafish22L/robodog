@@ -40,7 +40,7 @@ class Crawl:
     def joints(self, phase, seeds, warm=True):
         tg = self.targets(phase); js = {}
         for n, lg in self.legs.items():
-            q, _ = lg.ik(tg[n], seed=seeds.get(n, (0, 30, -70)), warm=warm); js[n] = q
+            q, _ = lg.ik(tg[n], seed=seeds.get(n, (0, 30, 45)), warm=warm); js[n] = q   # v9 positive-knee seed
         return js
 
 def _cam_png(path):
@@ -66,7 +66,7 @@ def run(params=None, cycles=4, filmstrip=None, walk=True):
             for j, a in zip(("splay", "pitch", "knee"), q):
                 p.setJointMotorControl2(rid, jn[f"{n}_{j}"], p.POSITION_CONTROL, np.radians(a), force=force, maxVelocity=9)
 
-    seeds = {n: (0, 40, -85) for n in legs}
+    seeds = {n: (0, 35, 45) for n in legs}   # v9 positive-knee standing seed (knee flex folds +)
     stand = gait.joints(0.0, seeds, warm=False); seeds = stand  # cold solve once -> a stable branch
     for n in legs:  # snap to stand, then settle under gravity
         for j, a in zip(("splay", "pitch", "knee"), stand[n]):
@@ -78,10 +78,11 @@ def run(params=None, cycles=4, filmstrip=None, walk=True):
     steps = int(cycles * period * 240); shots = []
     do_shots = filmstrip is not None
     shot_at = set(int(k * steps / 5) for k in range(6)) if do_shots else set()
-    fell = False
-    for s in range(steps):
+    fell = False; env_exceed = 0   # frame-clearance is NOT modelled in this ground-only sim (no self-collision),
+    for s in range(steps):         # so flag any commanded pose that leaves the verified collision-free gait_box.
         phase = ((s / 240.0 / period) % 1.0) if walk else 0.0
         js = gait.joints(phase, seeds, warm=True); seeds = js; command(js); p.stepSimulation()
+        env_exceed = max(env_exceed, sum(0 if K.in_working_envelope(q, "gait_box") else 1 for q in js.values()))
         pos, orn = p.getBasePositionAndOrientation(rid)
         roll, pitch, _ = p.getEulerFromQuaternion(orn)
         if pos[2] < 0.05 or abs(roll) > 1.1 or abs(pitch) > 1.1:
@@ -99,7 +100,8 @@ def run(params=None, cycles=4, filmstrip=None, walk=True):
         sheet.save(os.path.join(HERE, filmstrip))
     p.disconnect()
     return {"travel_mm": round(travel, 1), "final_z_mm": round(pos[2] * 1000, 1),
-            "roll_deg": round(roll, 1), "pitch_deg": round(pitch, 1), "yaw_deg": round(yaw, 1), "fell": fell}
+            "roll_deg": round(roll, 1), "pitch_deg": round(pitch, 1), "yaw_deg": round(yaw, 1), "fell": fell,
+            "envelope_exceeded_legs": env_exceed}   # >0 => this gait commands poses that can strike the frame
 
 if __name__ == "__main__":
     print("STAND-only stability (no gait):")

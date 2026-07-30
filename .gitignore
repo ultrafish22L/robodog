@@ -19,6 +19,7 @@ ref/*.glb
 ref/*.stl
 
 # Servo reference scans + AI-generated assets + downloaded reference models (huge binaries, kept locally)
+servos/
 aigenerated/
 servo1/
 servo2/

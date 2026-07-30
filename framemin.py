@@ -198,17 +198,40 @@ try:
     chb=box(TARGET+2,CH*2.0,CH*2.0,v(-(TARGET/2+1),-CH,-CH)); chb.rotate(v(0,0,0),X,45.0)
     chb.translate(v(0,BY/2,TOPZ))
     FR=FR.cut(chb).cut(tf(chb,1,-1))
-    # ---- SNAP-BODY RETENTION BEAD (user 2026-07-29 "snaps onto frame top"): the one-piece cosmetic canopy
-    #      (part_body.py) clips on via 6 leaf-spring fingers that hook UNDER this bead. Continuous triangular bead on
-    #      the rim-cap OUTER face (Y=BY/2), x[-75,75] both rails -- ends >=18mm inboard of the coxa (x~100) so the leg
-    #      gates are untouched. Cross-section (Y,Z): tip 1.0mm proud at (36.7,16.2); 20deg down-facing undershelf up
-    #      to the wall (35.7,16.55); 61deg top lead-in ramp up to (35.7,18.0); stays >=0.7mm below the 45deg register
-    #      chamfer (z>=18.7). A 0.4mm relief groove under the undershelf so floor-down bridging droop can't fill the catch.
-    _by=BY/2.0
-    _bead=Part.Face(Part.makePolygon([v(-75,_by-0.5,16.55),v(-75,_by+1.0,16.2),v(-75,_by-0.5,18.0),v(-75,_by-0.5,16.55)])).extrude(v(150,0,0))
-    FR=FR.fuse(_bead).fuse(tf(_bead,1,-1))
-    _rel=box(150,1.2,0.4,v(-75,_by,15.75)); FR=FR.cut(_rel).cut(tf(_rel,1,-1))   # anti-droop relief under the undershelf
+    # ---- SNAP (user 2026-07-29 "post nubs that snap into receivers inside the body -- lateral nubs to hold, some
+    #      vertical posts for alignment"): replaces the old continuous bead + leaf-finger scheme. The frame carries
+    #      (a) lateral detent NUBS on the rim outer face (Y=BY/2) that click into wall POCKETS in the body, and (b) a
+    #      few vertical alignment POSTS on the corner-block tops that drop into CUP bores in the body roof. part_body
+    #      reads these globals to cut the matching receivers. Nubs live on the trunk-side rim only (x within +/-60,
+    #      where BOTH the frame rim and the body side-wall exist -- the hip openings gap the wall beyond that and the
+    #      head/rump caps sit outboard of the frame); the caps are held via those outer nubs + the body's stiffened
+    #      crown-spine rib. Posts sit fore/aft on the corner blocks for X-Y-theta registration on drop-on. ----
+    SNAP_Y=BY/2.0                                     # rim outer face; nubs root here and protrude +Y
+    NUB=dict(zc=16.2,hh=1.4,proud=2.0,w=9.0)          # symmetric detent bump: tip +proud past the rim (Y=BY/2=35.7) to
+    #  Y37.7 -- the body side-wall inner sits at ~37.3 (1.6mm clearance gap to the 35.7 rim), so proud must cross that
+    #  gap AND bite ~0.4mm into the wall for a real detent; the body pocket (part_body, keyed to proud) relieves the seat.
+    NUB_X=[-60.0,-32.0,0.0,32.0,60.0]                 # per-rail X centres (mirrored to both rails); all within +/-60
+    POST=[(50.0,28.0,4.0,3.0),(-50.0,28.0,4.0,3.0),   # (x,y,dia,h) alignment pegs on the corner-block top (mirrored to -Y)
+          (88.0,0.0,3.6,4.0),(-88.0,0.0,3.6,4.0)]     # CENTRAL pegs on the middle wall (Y=0 wall top z20.7) under the head/rump
+    #  -> anchor the roof crown-spine (+ its rib, + the head/rump strips) down to the frame centrally at each end (user 2026-07-29)
+    POST_Z0=TOPZ                                       # pegs stand up from the frame top
+    def _nubf(xc):
+        yr=SNAP_Y-1.0    # ROOT the nub 1mm INSIDE the rim: a coincident-face fuse at Y=BY/2 (right at the truss-window
+                         # edge z14.7) silently no-op'd; an overlapping base fuses robustly. Tip still stands to +proud.
+        pr=[(yr,NUB['zc']-NUB['hh']),(SNAP_Y+NUB['proud'],NUB['zc']),(yr,NUB['zc']+NUB['hh'])]
+        return Part.Face(Part.makePolygon([v(xc-NUB['w']/2.0,y,z) for (y,z) in pr]+[v(xc-NUB['w']/2.0,pr[0][0],pr[0][1])])).extrude(v(NUB['w'],0,0))
+    for xc in NUB_X:
+        nb=_nubf(xc)
+        # removeSplitter after EACH fuse: the nubs sit over the truss windows (edge at z14.7); a bare fuse there
+        # leaves a non-manifold seam (invalid solid, silently dropped) -- removeSplitter heals it each step.
+        for s in (nb, tf(nb,1,-1)):
+            FR=FR.fuse(s).removeSplitter()
+    for (px,py,pd,ph) in POST:
+        pg=Part.makeCylinder(pd/2.0,ph,v(px,py,POST_Z0),Z)
+        pg=pg.fuse(Part.makeCone(pd/2.0,max(0.4,pd/2.0-0.7),0.7,v(px,py,POST_Z0+ph),Z))   # top lead-in chamfer
+        FR=FR.fuse(pg).fuse(tf(pg,1,-1))
     FR=FR.removeSplitter()
+    log("  snap: %d lateral nubs (x=%s, +/-Y) + %d alignment posts (x+/-50,y+/-28)"%(2*len(NUB_X),NUB_X,2*len(POST)))
     # ---- ONE continuous bottom-outer chamfer, FULL length head->rump (user 2026-07-28: "match the chamfer on the head
     #      and rump on the belly, so it's just one larger chamfer"). Replaces the old two-tier belly (shallow mid-span
     #      bevel + deep hip toe-in ramp with a step between). A single 45deg chamfer from the wall at (BY/2, ZTOP) down-
@@ -282,6 +305,36 @@ try:
     m=MeshPart.meshFromShape(Shape=FR,LinearDeflection=0.08,AngularDeflection=0.35,Relative=False)
     m.write(r"C:/ultrafish/robodog/stl/sm3sg90_v9_frame.stl")
     log("  STL sm3sg90_v9_frame facets=%d"%m.CountFacets)
+    # ---- SPLAY PIN (printed screw-in, user 2026-07-29): mates the collar's coarse internal thread. A smooth O7.8
+    #      pilot rides the coxa 688 (O8 bore, just inboard of PINTIP); a matching P2.0 external thread screws into the
+    #      collar; a round head with a screwdriver SLOT drives it home. Body of revolution + RH thread -> ONE STL,
+    #      print x4 (all corners identical). NB the thread MATES the same helix framemin cuts into the bore (+0.25 clr).
+    PIN=None                                             # exposed as a global so dog14 can place the real pin (not a dowel proxy)
+    try:
+        _THP,_THD,_CLR=2.0,0.7,0.25
+        _rc=PINBORE/2.0-_CLR                           # thread core r3.70 (bore crest r3.95 -> 0.25 clr)
+        _rsh=PINBORE/2.0-0.05                           # smooth shaft r3.90 (O7.8, rides the O8 688)
+        _xt=PINTIP; _xth=PINTIP+6.4; _xf=cbx1+COLL      # tip / thread-start (past the 688) / collar +X face
+        _HD,_HT=13.0,3.0                                # round head O13 x 3 (seats on the O16 collar face)
+        PIN=Part.makeCone(_rc-0.4,_rsh,1.6,v(_xt,SPYp,SPZp),X)                              # lead-in taper tip
+        PIN=PIN.fuse(Part.makeCylinder(_rsh,_xth-(_xt+1.6),v(_xt+1.6,SPYp,SPZp),X))         # smooth shaft (rides 688)
+        PIN=PIN.fuse(Part.makeCylinder(_rc,_xf-_xth,v(_xth,SPYp,SPZp),X))                   # threaded-section core
+        _hx=Part.makeHelix(_THP,(_xf-_xth)+_THP,_rc)                                        # external thread (mates bore)
+        _prf=Part.Wire(Part.makePolygon([v(_rc,0,-_THP*0.42),v(_rc+_THD,0,0),v(_rc,0,_THP*0.42),v(_rc,0,-_THP*0.42)]))
+        _rdg=_hx.makePipeShell([_prf],True,False); _rdg.rotate(v(0,0,0),Y,90.0); _rdg.translate(v(_xth,SPYp,SPZp))
+        PIN=PIN.fuse(_rdg)
+        PIN=PIN.fuse(Part.makeCylinder(_HD/2.0,_HT,v(_xf,SPYp,SPZp),X))                     # round head
+        PIN=PIN.cut(box(2.0,2.4,_HD+2.0,v(_xf+_HT-2.0,SPYp-1.2,SPZp-(_HD+2.0)/2.0)))        # screwdriver SLOT (2.4 wide x 2 deep)
+        PIN=PIN.removeSplitter()
+        _mp=MeshPart.meshFromShape(Shape=PIN,LinearDeflection=0.05,AngularDeflection=0.25,Relative=False)
+        _k=0
+        while _mp.hasSelfIntersections() and _k<4: _mp.fixSelfIntersections(); _k+=1
+        if _mp.hasNonManifolds(): _mp.removeNonManifolds()
+        _mp.harmonizeNormals(); _mp.write(r"C:/ultrafish/robodog/stl/sm3sg90_pin.stl")
+        log("  STL sm3sg90_pin facets=%d valid=%s solids=%d  (O7.8 pilot + P2.0 thread + slotted O13 head; print x4)"%(
+            _mp.CountFacets,PIN.isValid(),len(PIN.Solids)))
+    except Exception as _pe:
+        log("  PIN build SKIPPED: %s"%_pe)
     if App.GuiUp:
         nm="framemin"
         if nm in list(App.listDocuments()): App.closeDocument(nm)

@@ -30,7 +30,7 @@ def resolve(mode, canon):
 SPL_TEETH = 23; SPL_MAJOR = 4.9; SPL_ROOT = 4.4; SPL_TCLR = 0.10   # MESH: 23T female (matches the real servo)
 RND_DISK  = 20.0; RND_DT = 1.5; RND_SPL = 7.0; RND_ST = 3.0        # ROUND: O20 disc x1.5 + O7 x3 spline hole
 ARM_HUB_D = 7.3;  ARM_HUB_H = 4.25; ARM_LEN = 12.5                 # ARM: hub O7.3 x4.25 + arm 12.5 (USER MEASURED)
-ARM_W = 5.0; ARM_T = 1.6                                           # ARM blade section -- ASSUMED (verify on bench)
+ARM_W = 5.0; ARM_T = 1.7                                           # ARM blade: 1.7 thick, FLUSH WITH THE HUB TOP (user 2026-07-29); W still assumed
 HFIT = 0.15                                                        # horn drop-in clearance (FDM bores print undersize)
 
 def arm_reach():  return ARM_LEN + HFIT
@@ -75,10 +75,11 @@ def horn_void(part, P, D, A, mode, floor=0.5, mesh_len=4.5, m2=None, rnd_disk=RN
         return _big(part)
     if mode == 'arm':                                             # OEM single-arm horn, embedded at a pause
         aL = ARM_LEN/1.0 + HFIT; aW = ARM_W/2.0 + HFIT; aT = ARM_T + HFIT
+        aTop = floor + ARM_HUB_H                                                   # hub top (deepest into the part; roof caps here)
         part = part.cut(_cyl(RND_SPL/2.0+HFIT, P, D, -0.1, floor))                 # spline-clearance bore to the shelf
-        part = part.cut(_cyl(ARM_HUB_D/2.0+HFIT, P, D, floor, floor+ARM_HUB_H))    # hub pocket (boss projects into part)
+        part = part.cut(_cyl(ARM_HUB_D/2.0+HFIT, P, D, floor, aTop))               # hub pocket (boss projects into part)
         _ahi = aL if slot=='through' else 0.0                                     # 'down' = single-sided (-A only): arm points down the bone, no +A notch
-        part = part.cut(_abox(P, D, A, floor, floor+aT, -aL, _ahi, -aW, aW))       # arm slot at the hub base
+        part = part.cut(_abox(P, D, A, aTop-aT, aTop, -aL, _ahi, -aW, aW))         # arm slot FLUSH WITH THE HUB TOP (real blade sits on the hub top, not the base)
         if m2: part = part.cut(_cyl(m2/2.0, P, D, -1.0, 100.0))
         return _big(part)
     raise SystemExit("horn_void: bad mode %r" % mode)

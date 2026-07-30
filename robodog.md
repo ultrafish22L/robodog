@@ -5,14 +5,13 @@ You're mid-project, not starting fresh — **this file is the restart doc.** Rea
 
 **Canonical scripts** (run via `exec(open(path).read())` in the FreeCAD MCP; there is no saved `.FCStd`). **⚠ Current phase = v9** (direct-drive, 200 mm — see the LAST `### Update`): the live builds are **`legflat_v9.py`** (leg, spec `LEG_SPEC.md`), **`coxablock.py`** (coxa, spec `COXA_SPEC.md`, unchanged for v9 per R15), **`framemin.py`** (200 mm minimal frame) and **`dog14.py`** (v9 assembly + clearance gates). All run headless via `freecadcmd.exe` when the GUI/MCP is down. dog13 below remains the v22-era reference/axes donor the v9 scripts exec for parts:
 - **`dog13.py`** — the v22 canonical geometry (frame + 4 legs + 12 servos) + all gates + stance render. Gate log accumulates in `ref/iter/leg13_dog13.txt` (**read the TAIL** — latest run).
-- **`part_body.py`** — ⚠ CURRENT cosmetic body (see LAST Update): ONE-piece hollow **yellow** snap-on canopy → `stl/sm3sg90_body.stl`, snaps onto the frame rim-cap bead. Supersedes **`bodyview.py`** (the old 4-piece lid/tub/head/rump covers, kept for the `rrect`/`MAIN` silhouette part_body reuses).
-- **`assembly.py`** — full-dog render (covers on + X-ray) + the interference AUDIT (execs bodyview; writes `ref/iter/audit.txt`). **Re-run after any cover/frame change.**
-- **`frameview.py`** isolated frame render · **`legwork.py`/`poseview.py`** isolated leg render harnesses · **`pamphlet_render.py`** → part JPEGs · **`pamphlet.html`** wordless manga assembly manual (published as an Artifact).
+- **`part_body.py`** — ⚠ CURRENT cosmetic body: ONE-piece hollow **yellow** snap-on canopy → `stl/sm3sg90_body.stl`; single-feature head/rump, crown-spine rib, nub/post/peg/collar snaps. (The old 4-piece `bodyview.py` + the render/audit/pamphlet harnesses `assembly.py`/`frameview.py`/`legwork.py`/`poseview.py`/`pamphlet_render.py` were **removed in the 2026-07-30 cleanup** — git-recoverable / in a local attic.)
+- **`horns.py`** — the 3-mode servo-horn receivers (arm/mesh/round); **arm** is canonical and now embeds the REAL horn mesh `servos/hornarm.stl`. **`dog14.py`** — v9 assembly doc (frame+pegs, coxae, real pins, legs, snap-on body) + clearance gates.
 
 Operational must-knows before touching FreeCAD:
 - `execute_code` returns a huge dark inline screenshot — write numeric reports/gates to a file and Read the saved **white-bg** PNGs (`ref/iter/*.png`) instead. `ref/iter/` is gitignored (regenerable).
 - Every printable part must be a single solid (single **shell** too, for the hollow covers — a trapped void isn't printable); re-run the gates after any change. Mirror legs **L/R only**. Don't reinvent the verified joint mechanism.
-- **Deliverable = 7 STLs → `stl/sm3sg90_*.stl`** for a **Bambu Lab A1**: `body_top_lid, body_bottom_tub, frame, femur, tibia, coxa, boot_TPU` (boot in flexible TPU, rest rigid; the legs still need L/R + front/rear-tibia mirrors for the full 12-servo set).
+- **Deliverable = 11 STLs → `stl/sm3sg90_*.stl`** for a Bambu **X1C** (256³): `v9_frame`, `body`, `coxa`+`_mir`, `coxa_cover`+`_mir`, `v9_femur`+`_mir`, `v9_tibia`+`_mir`, `pin` — all watertight/manifold, **first printable prototype 2026-07-30**. Chiral legs need L/R (`_mir`); pin prints ×4. Full table in `README.md`.
 - **Colorway:** yellow body covers + yellow femur, black coxa/tibia/boot, grey servos (Spot-like yellow-body / black-leg).
 - The user is a CAD / Octane-SDK expert: terse replies, ask a clarifying question rather than burn rebuilds, no trailing recaps.
 
@@ -91,16 +90,20 @@ Either way: **grow the cosmetic skin over the verified joint cores, then re-cut 
 - Mirror legs **left/right only** — never front/back (that caused the sawhorse "footstool" splay).
 - View every render against `ref/` yourself; numeric gates alone hid bad geometry before.
 
-## Files (current)
-- **`dog13.py`** — canonical printable geometry (frame + 4 legs + 12 servos) + gates + stance render. **Self-contained** (does NOT exec leg4/5/7). Part colors + the assembled `parts` list live here.
-- **`bodyview.py`** — the cosmetic snap-on covers: hollow yellow lid + tub, cantilever latches, frame locating keys. Execs dog13; renders `body_concept.png`.
-- **`assembly.py`** — full-dog render (covers + X-ray) + interference audit. Execs bodyview → `ref/iter/audit.txt`.
-- **`frameview.py`** / **`legwork.py`** / **`poseview.py`** — isolated frame / leg render harnesses.
-- **`pamphlet_render.py`** → `ref/iter/pam_*.jpg`; **`pamphlet.html`** — wordless manga assembly manual (embeds those JPEGs as data-URIs; published as an Artifact).
-- `stl/sm3sg90_*.stl` — the 7 print-ready parts.
-- `ref/` — real-Spot reference images (`n1_1`/`n2_1`/`n3_1.png`, `BDspotdog.jpg`); use meshes as translucent GHOST only, never boolean. `ref/iter/` (**gitignored**, regenerable) holds all renders + gate logs (`leg13_dog13.txt`, `audit.txt`, `body_concept.png`, `assembly.png`).
-- Auto-memory (loaded each session): `C:\Users\johnc\.claude\projects\C--ultrafish-robodog\memory\MEMORY.md`.
-- **Legacy / superseded (git history, still on disk):** `dog.py` + `leg4/5/7.py` — the old SM3-referenced full-dog exec chain that **dog13.py replaced**; the design bible + the `### Update` history below still refer to them for context. (`leg2/3/6.py`, `spot_*leg.py`, `knee_concept.py`, `build.py`, `crouch.py`, `foldflat.py` were deleted — git-recoverable.)
+## Files (current — v9, after the 2026-07-30 cleanup)
+The repo now holds ONLY the live v9 chain (all v3–v8 legs, old body/frame, and the render/pamphlet
+harnesses were moved to a local attic / are in git history). See `README.md` for the build commands.
+- **`dog13.py`** + modules **`dogcommon.py`**, **`part_femur.py`**, **`part_tibia.py`**, **`part_boot.py`**, **`part_shoulder.py`**, **`part_frame.py`**, **`part_dummies.py`** — base geometry, the MEASURED joint/splay axes, the scanned-servo cutter. Loaded via `dinc()`; **the source of truth for all axes.**
+- **`framemin.py`** → `sm3sg90_v9_frame.stl` + `sm3sg90_pin.stl` (frame, snaps, alignment/central pegs, printed screw-in splay pin).
+- **`part_body.py`** → `sm3sg90_body.stl` (one-piece snap-on canopy). Execs `dog14.py`.
+- **`coxablock.py`** → `sm3sg90_coxa[_mir].stl` + `sm3sg90_coxa_cover[_mir].stl` (spec `COXA_SPEC.md`).
+- **`legflat_v9.py`** → `sm3sg90_v9_{femur,tibia}[_mir].stl` (spec `LEG_SPEC.md`).
+- **`horns.py`** — 3-mode horn receivers; arm canonical, embeds `servos/hornarm.stl`. **`dog14.py`** — v9 assembly + gates.
+- **`control/`** — all-Python control/sim stack (`gen_urdf.py`, `kinematics.py`, `gait.py`, `poses.py`, `viz.py`, `explore.py`) + `robodog.urdf`. See `control/README.md`.
+- **`stl/sm3sg90_*.stl`** — the 11 print-ready parts (canonical set).
+- `ref/` — real-Spot reference images (`BDspotdog.jpg` etc.). `ref/iter/` (**gitignored**, regenerable) holds renders + gate logs. `servos/` = local reference scans (gitignored; **`servos/hornarm.stl` force-tracked** — build dependency).
+- Auto-memory (loaded each session): `C:\Users\johnc\.claude\projects\C--ultrafish-robodog\memory\`.
+- **Stale (old design, generator removed):** `pamphlet.html`, `robodog.pdf`, `robodog.3mf` — the 4-piece-body assembly manual; regenerate or drop before reuse.
 
 ## FreeCAD-via-MCP gotchas
 - Each `execute_code` returns a ~25k-token base64 screenshot and has a ~90 s GUI timeout. **Print/write numeric reports to a file before any view op.** Minimize view ops; render to saved PNGs and read those instead of relying on the inline screenshot.
@@ -354,3 +357,13 @@ Servo-horn work landed 07-28 (see auto-memory **`servo-horn-3way.md`**: every ho
 - **THE SNAP (design panel wf_87f61947, outer-hook, releases straight-UP for belly servicing):** FRAME side = a continuous triangular **retention bead** on the rim-cap outer face x[-75,75] both rails (tip Y36.7/z16.2, 20° undershelf); SHELL side = **6 leaf-spring fingers** (3/rail at x=0,±45) whose nubs hook under the bead. Frame with bead = watertight **110 g**, gates still 0.00. Full detail (params, the gotchas: clearance box must cap at frame top / never cut the leg bbox / floor below the frame pan / cyl→Part.makeCylinder) in auto-memory **`snap-on-body.md`**.
 - **Assembly loaded in FreeCAD GUI** as doc `robodog_latest` (frame + body + 4 legs; instance A, RPC 9875 — relaunch `freecad.exe` if the GUI is closed, poll 9875, then reload the STLs). Renders: `ref/iter/body_wrap.png`, `body_asm.png`, `body_fit.png`.
 - **OPEN refinements (not blockers):** shell has NO tight Y register (fingers + skirt gap hold it — a 45° register bevel on the rim-cap chamfer would remove side play); no explicit head/rump X-cups; the |Y|<6 crown-spine bridge over each hip is thin (prints in-plane belly-up, OK). Frame/body **not committed** (working-tree changes); slice `sm3sg90_v9_frame.stl` + `sm3sg90_body.stl` (+ coxa/legs from the 07-28 arm set) for a first fit print.
+
+### Update — session 2026-07-29…30 (**FIRST PRINTABLE PROTOTYPE**: body snaps + screw-in pin + real horn embed + repo cleanup) — CURRENT
+The 07-29 snap-on body above was reworked through user review into the printable v9 set. Branch **`v9-canopy-snaps-cleanup`** (3 commits; local only). Full details in auto-memory (`snap-on-body.md`, `servo-horn-3way.md`).
+- **Body (`part_body.py`) rebuilt:** head/rump are now ONE tall loft (dropped the dome+skirt+keel-chamfer that read as two stacked lobes → each cap a single smooth feature); a continuous **crown-spine RIB** stiffens the flimsy connecting strips. The **bead+leaf-finger snap was replaced** (user "post nubs into receivers") by: 10 **lateral detent nubs** (frame rim → body wall pockets) + 4 **vertical alignment posts** (corner-block tops → cups) + 2 **central-wall pegs** (the Y=0 middle wall → spine-rib cups, anchoring head/rump) + **collar-grip rings** on the caps (grip the frame end; the caps are noses beyond the frame, so the Ø16 collars are the only contact). Belly leg-relief keeps shell^leg 0. Watertight/1-solid.
+- **Printed screw-in splay pin** (`framemin.py` → `sm3sg90_pin`, was a bought dowel): Ø7.8 pilot rides the coxa 688 + a P2.0 external thread mating the collar bore + a slotted Ø13 head; print ×4.
+- **Arm horn = canonical** for coxa + legs (`coxablock` CANON=arm, `legflat_v9` arm-only export). The parametric hub+slot never seated the real horn → **`horns.py` now EMBEDS the real mesh `servos/hornarm.stl`** (transform +Z→into-part, +X→arm-down-bone; the void IS the horn). The knee blade reaches z−80.4, so the **tibia lightening slots moved down** (slot1 z1=−87) to clear it.
+- **`dog14.py` bakes in the full assembly** (framemin exposes `PIN`; `dowel_at`→`pin_at`; GUI doc loads the body STL) → 34-object doc. **URDF regenerated** on the arm meshes (`control/gen_urdf.py`, 13 links / 12 joints).
+- **Repo cleanup:** pruned to the v9 chain only (v3–v8 legs, old body/frame, `export.py`/`bodyview.py`/`assembly.py`/view+pamphlet scripts, horn variants, boot/foot/dummy STLs → local attic); **canonical = 11 watertight STLs**; `.gitignore servos/` (208 MB) but force-track `servos/hornarm.stl`; README rewritten for v9.
+- **Gates:** shell^frame 0 (bar the intended ~86 mm³ collar grip), shell^leg 0, leg-vs-frame/coxa WORKING-range 0; all 11 STLs watertight/manifold. **→ slicer-ready first prototype.**
+- **OPEN (next session):** collar grip is a light press (add a groove for a positive click?); arm-horn blade WIDTH + a few servo fits are bench-verify; push the branch / open a PR; the `pamphlet.*` manual is stale (old 4-piece body).

@@ -1,23 +1,73 @@
-# Robodog — custom 3D-printable SG90 quadruped
+# Robodog — custom 3D-printable micro-servo quadruped
 
-A parametric, 3D-printable quadruped robot dog — a **completely custom design** (Boston Dynamics
-Spot and the open-source SM3 Spot-Micro are visual **references only**; no external mesh or part
-is used), driven by **12 SG90 micro-servos** (3 per leg). Geometry is generated
-in **FreeCAD 1.1** through the FreeCAD MCP (`mcp__freecad__execute_code`) — there is no saved
-`.FCStd`; running the scripts rebuilds everything.
+A parametric, 3D-printable quadruped ("Spot-mini") — a **fully custom design** (Boston Dynamics
+Spot and the SM3 Spot-Micro were visual **references only**; no external mesh is used). Driven by
+**12 micro-servos, 3 per leg** (knee = **MG90S** metal-gear, single-shear; the rest SG90-class).
+Geometry is generated in **FreeCAD 1.1** by Python `Part` scripts — there is no saved `.FCStd`;
+running the scripts rebuilds and re-exports everything.
 
-## Build
-Exec `dog.py` inside FreeCAD (via the MCP). It chains `leg7 → leg5 → leg4`, assembles the
-4-leg dog, and writes the print-ready parts to `stl/sm3sg90_*.stl`. White-background reference
-renders are written to `ref/iter/dog_{side,front,top,iso}.png`.
+> **Status — FIRST PRINTABLE PROTOTYPE (2026-07-30).** The v9 canonical set (11 STLs below) is
+> watertight/manifold and slicer-ready for a Bambu **X1C** (256³ bed). See `robodog.md` (design
+> bible + session log) for the full history and the latest `### Update`.
 
-## Deliverable
-Six print-ready STLs for a **Bambu Lab A1** (256³ build volume): `coxa, femur, tibia, boot,
-body, head`. Print the **boot** in flexible **TPU**; everything else rigid. A full dog =
-4× each leg part + 1 body + 1 head.
+## Design (v9)
+- **Direct-drive knee** (no linkage): the tibia bolts straight to the knee servo horn. ~200 mm dog,
+  frame X ±103 mm.
+- **Open truss frame** (`framemin.py`) with a central Y=0 wall, rim rails, 4 corner blocks, and two
+  Ø16 splay-pin collars ~3 mm proud fore/aft. Carries the body snaps + alignment pegs.
+- **One-piece snap-on body** canopy (`part_body.py`): single-feature head/rump, open belly over the
+  trunk, form-fit hip openings, a crown-spine stiffener rib. Held by **lateral detent nubs + vertical
+  alignment posts + central-wall pegs + collar-grip rings**.
+- **Servo-horn receivers** are embedded (`horns.py`): the **arm** horn is the canonical print — the
+  real OEM horn mesh (`servos/hornarm.stl`) is cut into the coxa/femur/tibia so the actual horn
+  drops in at a print pause. (`mesh`/`round` variants available via `--horn=`.)
+- **Printed screw-in splay pin** (`framemin.py` → `sm3sg90_pin`): Ø7.8 pilot + P2.0 thread mating
+  the collar bore + a slotted Ø13 head. Print ×4.
+
+## Canonical print set — 11 STLs (`stl/sm3sg90_*.stl`)
+| STL | qty | script | notes |
+|---|---|---|---|
+| `sm3sg90_v9_frame` | ×1 | `framemin.py` | open truss, ~111 g |
+| `sm3sg90_body` | ×1 | `part_body.py` | snap-on canopy |
+| `sm3sg90_coxa` + `_mir` | ×2 ea | `coxablock.py` | L/R chiral, arm horn |
+| `sm3sg90_coxa_cover` + `_mir` | ×2 ea | `coxablock.py` | femur-hip bearing face |
+| `sm3sg90_v9_femur` + `_mir` | ×2 ea | `legflat_v9.py` | arm horn |
+| `sm3sg90_v9_tibia` + `_mir` | ×2 ea | `legflat_v9.py` | arm horn, direct-drive |
+| `sm3sg90_pin` | ×4 | `framemin.py` | screw-in splay pin |
+
+All rigid PLA/PETG/ASA. **Bought:** 12 micro-servos, 8× 688 + 4× 684 bearings, M2 screws, electronics.
+
+## Build / regenerate
+Scripts `exec` each other into shared globals (never `import`). Run **headless** (GUI-independent):
+```bash
+"C:/Program Files/FreeCAD 1.1/bin/freecadcmd.exe" -c "exec(open('part_body.py').read())"   # coxa+cover+frame+body+pin
+"C:/Program Files/FreeCAD 1.1/bin/freecadcmd.exe" -c "exec(open('legflat_v9.py').read())"  # femur+tibia (+mirrors)
+```
+`part_body.py` chains `dog14.py → dog13.py, coxablock.py, framemin.py, legflat_v9.py`. For the live
+assembly view, run `dog14.py` in the FreeCAD GUI (frame + 4 legs + coxae + pins + body). Add
+`--horn=mesh|round` to regenerate a horn variant.
 
 ## Key files
-- `dog.py` — current full-dog assembly (main deliverable).
-- `leg4/5/7.py` — the verified leg + joint chain `dog.py` builds on.
-- `robodog.md` — the design bible **and restart doc**: read it to resume a session (visual target, joint mechanism, rules, gotchas, session history).
-- `ref/` — visual-target photos + reference meshes (large scan meshes are gitignored).
+- **`dog13.py`** + its modules (`dogcommon`, `part_femur`, `part_tibia`, `part_boot`, `part_shoulder`,
+  `part_frame`, `part_dummies`) — base geometry, the measured joint/splay axes, servo-mesh cutter.
+- **`legflat_v9.py`** (leg, spec `LEG_SPEC.md`), **`coxablock.py`** (coxa, spec `COXA_SPEC.md`),
+  **`framemin.py`** (frame + pin), **`part_body.py`** (body), **`horns.py`** (horn receivers),
+  **`dog14.py`** (assembly + clearance gates).
+- **`control/`** — the all-Python control/sim stack (URDF generated from the CAD axes; PyBullet, gait,
+  poses). See `control/README.md`; `robodog.urdf` is regenerated by `control/gen_urdf.py`.
+- **`robodog.md`** — the design bible + session log (**read the latest `### Update` to resume**).
+- Auto-memory (loaded each session): `~/.claude/projects/C--ultrafish-robodog/memory/`.
+
+## Gotchas (the ones that bite)
+- Every printable part must be a **single watertight solid** (single shell for the hollow body — a
+  trapped void isn't printable). Re-run the clearance gates after any change.
+- STL export via `MeshPart.meshFromShape` (not `Shape.exportStl`); gate on watertight + manifold.
+- The full chain in the **GUI exceeds the 90 s MCP RPC cap** (coxablock mesh booleans) — build
+  headless via `freecadcmd`, or run `dog14` in the GUI and let the doc finish on the GUI thread.
+- `servos/` is large local reference (gitignored) — but `servos/hornarm.stl` is force-tracked because
+  `horns.py` reads it at build time.
+
+## Known open items
+- Collar grip is a light press (0.2 mm), not a click-into-groove snap — tune if wanted.
+- Blade **width** in the arm horn embed and a few servo fits are still bench-verify items.
+- `pamphlet.html` / `robodog.pdf` are the **old-design** assembly manual (generator removed) — stale.

@@ -53,6 +53,23 @@ def _abox(P, D, A, dlo, dhi, alo, ahi, wlo, whi):    # box from local depth(D)/a
 def _big(s):
     q = s.Solids; return max(q, key=lambda k: k.Volume) if q else s
 
+# ---- real OEM arm horn as a solid (servos/hornarm.stl), cached. Local frame: spline axis +Z (Z0=servo/mating
+#      face, Z~4.2=hub top), arm +X, width Y, hub centred at the origin. The parametric hub+slot approximation
+#      never seated the real blade -- embed the actual mesh so the horn drops in. ----
+ARM_STL = r"C:/ultrafish/robodog/servos/hornarm.stl"
+_ARM_SOLID = None
+def _arm_horn():
+    global _ARM_SOLID
+    if _ARM_SOLID is None:
+        import Mesh as _M
+        hm = _M.Mesh(ARM_STL)
+        sh = Part.Shape(); sh.makeShapeFromMesh(hm.Topology, 0.1)
+        s = Part.makeSolid(sh).removeSplitter()
+        try: s = s.makeOffsetShape(HFIT, 0.01)                      # drop-in clearance (FDM prints bores undersize)
+        except Exception: pass
+        _ARM_SOLID = s
+    return _ARM_SOLID
+
 def horn_void(part, P, D, A, mode, floor=0.5, mesh_len=4.5, m2=None, rnd_disk=RND_DISK, slot='through'):
     """Apply the chosen servo-horn receiver at mating-face point P, into-part dir D, arm dir A.
        mode in MODES. floor = arm-hub spline-clearance shelf depth. rnd_disk = round disc OD (per-receiver).
@@ -73,13 +90,17 @@ def horn_void(part, P, D, A, mode, floor=0.5, mesh_len=4.5, m2=None, rnd_disk=RN
         part = part.cut(_cyl(rnd_disk/2.0+HFIT, P, D, RND_ST, RND_ST+RND_DT))      # disc chamber (roof = solid beyond)
         if m2: part = part.cut(_cyl(m2/2.0, P, D, -1.0, 100.0))
         return _big(part)
-    if mode == 'arm':                                             # OEM single-arm horn, embedded at a pause
-        aL = ARM_LEN/1.0 + HFIT; aW = ARM_W/2.0 + HFIT; aT = ARM_T + HFIT
-        aTop = floor + ARM_HUB_H                                                   # hub top (deepest into the part; roof caps here)
-        part = part.cut(_cyl(RND_SPL/2.0+HFIT, P, D, -0.1, floor))                 # spline-clearance bore to the shelf
-        part = part.cut(_cyl(ARM_HUB_D/2.0+HFIT, P, D, floor, aTop))               # hub pocket (boss projects into part)
-        _ahi = aL if slot=='through' else 0.0                                     # 'down' = single-sided (-A only): arm points down the bone, no +A notch
-        part = part.cut(_abox(P, D, A, aTop-aT, aTop, -aL, _ahi, -aW, aW))         # arm slot FLUSH WITH THE HUB TOP (real blade sits on the hub top, not the base)
+    if mode == 'arm':                                             # EMBED the real OEM arm-horn mesh (the void = the horn)
+        import FreeCAD as _FC
+        horn = _arm_horn().copy()
+        at = (-A[0], -A[1], -A[2])                                                 # arm points -A (down the bone)
+        cX = at; cZ = D                                                            # horn +X->arm(-A), +Z(spline)->D(into part)
+        cY = (cZ[1]*cX[2]-cZ[2]*cX[1], cZ[2]*cX[0]-cZ[0]*cX[2], cZ[0]*cX[1]-cZ[1]*cX[0])   # +Y(width) -> D x (-A)
+        Pf = (P[0]+D[0]*floor, P[1]+D[1]*floor, P[2]+D[2]*floor)                   # hub bottom sits `floor` past the mating face (servo-shaft gap)
+        M = _FC.Matrix(cX[0],cY[0],cZ[0],Pf[0], cX[1],cY[1],cZ[1],Pf[1], cX[2],cY[2],cZ[2],Pf[2], 0,0,0,1)
+        horn = horn.transformGeometry(M)
+        part = part.cut(_cyl(RND_SPL/2.0+HFIT, P, D, -0.1, floor))                 # servo-shaft clearance to the hub bottom
+        part = part.cut(horn)                                                      # the real horn shape = the void (roof = solid beyond the hub top)
         if m2: part = part.cut(_cyl(m2/2.0, P, D, -1.0, 100.0))
-        return _big(part)
+        return _big(part.removeSplitter())
     raise SystemExit("horn_void: bad mode %r" % mode)

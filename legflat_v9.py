@@ -126,9 +126,11 @@ try:
         # factory-tapped output -- it's an M2 self-tapper into the boss cavity (M2.5 would split the O4.9 boss;
         # audit 2026-07-27); MG90S takes an M2 machine screw. O2.7 stays a clearance hole for the M2 shank.
         ti=biggest(ti.cut(disc(1.35,K,TIY0-1,BONE+2)))               # O2.7 M2 centre-screw shank clearance through the head (horn receiver applied AFTER, per-mode)
-        # lightening: the shin has the room -- racetrack slots down the neutral axis, ~3.5mm rim kept
-        ti=biggest(ti.cut(slot(XC,-72.0,-92.0,3.6,TIY0-1,BONE+2)))
-        ti=biggest(ti.cut(slot(XC,-96.0,-116.0,3.2,TIY0-1,BONE+2)))
+        # lightening: racetrack slots down the neutral axis, ~3.5mm rim kept. MOVED DOWN (user 2026-07-29) to clear
+        # the real arm-horn blade, which now reaches z=-80.4 (embedded OEM horn). NB the racetrack's top disc extends
+        # r ABOVE z1, so slot1 z1=-87 (r3.6) caps at -83.4 -> a ~3mm rib below the arm tip.
+        ti=biggest(ti.cut(slot(XC,-87.0,-101.0,3.6,TIY0-1,BONE+2)))
+        ti=biggest(ti.cut(slot(XC,-111.0,-125.0,3.2,TIY0-1,BONE+2)))
         # (ball foot removed per user 2026-07-28 -- tibia ends in the plain pointed blade toe again)
         return biggest(ti)
     TI0=tibia_blank()
